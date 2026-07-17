@@ -28,6 +28,25 @@ async def request_id_middleware(request: Request, call_next):
     response.headers["X-Request-ID"] = request_id
     return response
 
+@app.api_route("/", methods=["GET", "HEAD"], tags=["root"])
+async def root():
+    """Root endpoint returning API status, documentation links, and capabilities."""
+    return {
+        "app": "AI DOCX Academic Editor API",
+        "version": "1.0.0",
+        "status": "online",
+        "documentation": "/docs",
+        "health_check": "/health",
+        "endpoints": {
+            "create_session": "POST /v1/sessions",
+            "chat_planning": "POST /v1/sessions/{session_id}/chat",
+            "get_session": "GET /v1/sessions/{session_id}",
+            "get_graph": "GET /v1/sessions/{session_id}/graph",
+            "commit_proposal": "POST /v1/sessions/{session_id}/proposals/{proposal_id}/commit",
+            "export_version": "GET /v1/sessions/{session_id}/versions/{version}/export"
+        }
+    }
+
 @app.get("/health", tags=["health"])
 async def health_check():
     """Health check endpoint required by Milestone 0 exit condition."""
