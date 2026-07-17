@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proposal_id",
+    "session_id",
+    "base_version",
+    "state",
+    "plan",
+    "diff",
+    "citation_report",
+    "verification",
+    "warnings"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "base_version": {
+      "type": "integer"
+    },
+    "state": {
+      "enum": [
+        "PLANNING",
+        "PLAN_REJECTED",
+        "PROPOSAL_READY",
+        "VERIFYING",
+        "VERIFICATION_FAILED",
+        "AWAITING_APPROVAL",
+        "COMMITTED",
+        "REJECTED",
+        "EXPIRED"
+      ]
+    },
+    "plan": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "diff": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "citation_report": {
+      "type": "object"
+    },
+    "verification": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

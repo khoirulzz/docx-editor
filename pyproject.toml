@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-docx-editor-agent-workspace"
+version = "1.0.0"
+description = "AI DOCX Academic Editor — Agent Workspace"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic>=2.5.0",
+    "lxml>=5.0.0",
+    "python-multipart>=0.0.9",
+    "python-dotenv>=1.0.0",
+    "PyYAML>=6.0.0",
+    "httpx>=0.27.0"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+python_files = "test_*.py"
+addopts = "-v"

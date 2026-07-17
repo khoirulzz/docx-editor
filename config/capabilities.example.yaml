@@ -1,0 +1,35 @@
+models:
+  deepseek_v4_pro:
+    model_id: "deepseek-v4-pro"
+    json_object: true
+    tool_calling: true
+    context_tokens: 128000
+    zdr_required: true
+    prompt_caching: provider_dependent
+  blackbox_default:
+    model_id: "set-in-secret-or-variable"
+    json_object: true
+    tool_calling: true
+    context_tokens: null
+    zdr_required: true
+    prompt_caching: provider_dependent
+citation_adapters:
+  formatted_csl:
+    enabled: true
+    qualification: deterministic_tests
+  placeholder_manifest:
+    enabled: true
+    qualification: deterministic_tests
+  native_mendeley_legacy:
+    enabled: false
+    qualification_record: null
+  native_mendeley_cite:
+    enabled: false
+    qualification_record: null
+mutations:
+  replace_text_span: true
+  insert_paragraph: true
+  replace_plain_paragraph: true
+  delete_plain_paragraph: true
+  table_text_edit: false
+  tracked_changes_edit: false

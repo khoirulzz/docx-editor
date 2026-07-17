@@ -1,0 +1,243 @@
+openapi: 3.1.0
+info:
+  title: AI DOCX Academic Editor API
+  version: 1.0.0
+servers:
+  - url: /v1
+paths:
+  /sessions:
+    post:
+      operationId: createSession
+      summary: Upload a primary DOCX and optional reference assets
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [document]
+              properties:
+                document:
+                  type: string
+                  format: binary
+                assets:
+                  type: array
+                  items: {type: string, format: binary}
+                privacy_zdr_required:
+                  type: boolean
+                  default: true
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/SessionSummary'}
+        '400': {$ref: '#/components/responses/Error'}
+  /sessions/{session_id}:
+    get:
+      operationId: getSession
+      parameters: [{$ref: '#/components/parameters/SessionId'}]
+      responses:
+        '200':
+          description: Session summary
+          content: {application/json: {schema: {$ref: '#/components/schemas/SessionSummary'}}}
+        '404': {$ref: '#/components/responses/Error'}
+    delete:
+      operationId: deleteSession
+      parameters: [{$ref: '#/components/parameters/SessionId'}]
+      responses:
+        '204': {description: Deleted}
+  /sessions/{session_id}/assets:
+    post:
+      operationId: addAssets
+      parameters: [{$ref: '#/components/parameters/SessionId'}]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [assets]
+              properties:
+                assets:
+                  type: array
+                  items: {type: string, format: binary}
+      responses:
+        '202': {description: Assets accepted}
+        '400': {$ref: '#/components/responses/Error'}
+  /sessions/{session_id}/references/process:
+    post:
+      operationId: processReferences
+      parameters: [{$ref: '#/components/parameters/SessionId'}]
+      responses:
+        '202': {description: Reference processing started}
+        '409': {$ref: '#/components/responses/Error'}
+  /sessions/{session_id}/references/summary:
+    get:
+      operationId: getReferenceSummary
+      parameters: [{$ref: '#/components/parameters/SessionId'}]
+      responses:
+        '200':
+          description: Reference summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: {type: integer}
+                  ready: {type: integer}
+                  ambiguous: {type: integer}
+                  unresolved: {type: integer}
+  /sessions/{session_id}/proposals:
+    post:
+      operationId: createProposal
+      parameters:
+        - {$ref: '#/components/parameters/SessionId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [base_version, message]
+              additionalProperties: false
+              properties:
+                base_version: {type: integer, minimum: 1}
+                message: {type: string, minLength: 1, maxLength: 20000}
+                citation_mode:
+                  enum: [auto, preserve_only, formatted_csl, placeholder_manifest, native_mendeley]
+                  default: auto
+                citation_style: {type: string, default: apa}
+      responses:
+        '202':
+          description: Proposal planning started
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProposalSummary'}
+        '409': {$ref: '#/components/responses/Error'}
+  /sessions/{session_id}/proposals/{proposal_id}:
+    get:
+      operationId: getProposal
+      parameters:
+        - {$ref: '#/components/parameters/SessionId'}
+        - {$ref: '#/components/parameters/ProposalId'}
+      responses:
+        '200':
+          description: Proposal with diff and verification
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ProposalSummary'}
+  /sessions/{session_id}/proposals/{proposal_id}/decisions:
+    post:
+      operationId: decideProposalOperations
+      parameters:
+        - {$ref: '#/components/parameters/SessionId'}
+        - {$ref: '#/components/parameters/ProposalId'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accepted_operation_ids, rejected_operation_ids]
+              additionalProperties: false
+              properties:
+                accepted_operation_ids: {type: array, items: {type: string}, uniqueItems: true}
+                rejected_operation_ids: {type: array, items: {type: string}, uniqueItems: true}
+      responses:
+        '200': {description: Decision saved}
+        '409': {$ref: '#/components/responses/Error'}
+  /sessions/{session_id}/proposals/{proposal_id}/commit:
+    post:
+      operationId: commitProposal
+      parameters:
+        - {$ref: '#/components/parameters/SessionId'}
+        - {$ref: '#/components/parameters/ProposalId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [expected_base_version]
+              properties:
+                expected_base_version: {type: integer}
+      responses:
+        '201':
+          description: New committed version
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document_version: {type: integer}
+                  verification_status: {type: string}
+        '409': {$ref: '#/components/responses/Error'}
+  /sessions/{session_id}/versions/{version}/export:
+    post:
+      operationId: createExport
+      parameters:
+        - {$ref: '#/components/parameters/SessionId'}
+        - name: version
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        '201':
+          description: Export created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  download_url: {type: string, format: uri}
+                  expires_at: {type: string, format: date-time}
+components:
+  parameters:
+    SessionId: {name: session_id, in: path, required: true, schema: {type: string}}
+    ProposalId: {name: proposal_id, in: path, required: true, schema: {type: string}}
+    IdempotencyKey: {name: Idempotency-Key, in: header, required: false, schema: {type: string, maxLength: 200}}
+  schemas:
+    SessionSummary:
+      type: object
+      required: [session_id, state, document_id, current_version, outline, capabilities]
+      properties:
+        session_id: {type: string}
+        state: {type: string}
+        document_id: {type: string}
+        current_version: {type: integer}
+        outline: {type: array, items: {type: object}}
+        capabilities: {type: object}
+        warnings: {type: array, items: {type: string}}
+    ProposalSummary:
+      type: object
+      properties:
+        proposal_id: {type: string}
+        state: {type: string}
+        base_version: {type: integer}
+        instruction_summary: {type: string}
+        operations: {type: array, items: {type: object}}
+        diff: {type: array, items: {type: object}}
+        citation_report: {type: object}
+        verification: {type: object}
+        warnings: {type: array, items: {type: string}}
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, request_id]
+          properties:
+            code: {type: string}
+            message: {type: string}
+            details: {type: object}
+            request_id: {type: string}
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}

@@ -1,0 +1,128 @@
+{
+  "schema_version": "reference-pack/1.0",
+  "references": [
+    {
+      "reference_id": "ref:doi:10.1234/example.001",
+      "metadata": {
+        "type": "article-journal",
+        "title": "Digitalisasi Bukan Hanya Teknologi Online",
+        "author": [
+          {
+            "family": "Ulum",
+            "given": ""
+          }
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2026
+            ]
+          ]
+        },
+        "container-title": "Jurnal X",
+        "volume": "1",
+        "issue": "2",
+        "page": "15-29",
+        "publisher": null,
+        "DOI": "10.1234/example.001",
+        "URL": null,
+        "ISBN": null
+      },
+      "aliases": [
+        "ulum2026"
+      ],
+      "provenance": [
+        {
+          "file_id": "asset_notes",
+          "section": "paragraphs 2-3"
+        }
+      ],
+      "verification": {
+        "identity_status": "verified",
+        "metadata_status": "verified_by_identifier",
+        "confidence": 1.0,
+        "resolver": "crossref"
+      },
+      "citation_ready": true
+    },
+    {
+      "reference_id": "ref:unresolved:yusuf-2024",
+      "metadata": {
+        "type": null,
+        "title": null,
+        "author": [
+          {
+            "family": "Yusuf",
+            "given": ""
+          }
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2024
+            ]
+          ]
+        },
+        "container-title": null,
+        "volume": null,
+        "issue": null,
+        "page": null,
+        "publisher": null,
+        "DOI": null,
+        "URL": null,
+        "ISBN": null
+      },
+      "aliases": [],
+      "provenance": [
+        {
+          "file_id": "asset_notes",
+          "section": "paragraph 6"
+        }
+      ],
+      "verification": {
+        "identity_status": "unresolved",
+        "metadata_status": "incomplete",
+        "confidence": 0.2,
+        "resolver": null
+      },
+      "citation_ready": false
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EV-001",
+      "reference_id": "ref:doi:10.1234/example.001",
+      "raw_text": "Digitalisasi itu bukan cuma memindahkan kegiatan manual ke online, tetapi juga perubahan proses kerja dan pengelolaan informasi.",
+      "normalized_claim": "Digitalisasi mencakup transformasi proses kerja dan pengelolaan informasi, bukan hanya pemindahan aktivitas ke media daring.",
+      "classification": "paraphrase",
+      "locator": {
+        "label": "page",
+        "value": "17"
+      },
+      "topics": [
+        "digitalisasi",
+        "transformasi proses"
+      ],
+      "allowed_claims": [
+        "definisi digitalisasi",
+        "perubahan proses kerja"
+      ],
+      "prohibited_claims": [
+        "digitalisasi selalu meningkatkan efisiensi"
+      ],
+      "provenance": {
+        "file_id": "asset_notes",
+        "offset": "paragraph 2"
+      },
+      "verification": {
+        "status": "user_supplied"
+      }
+    }
+  ],
+  "unresolved_items": [
+    {
+      "raw": "Yusuf 2024",
+      "reason": "author-year is not a unique publication identity"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": "edit-plan/1.0",
+  "document_id": "doc_example",
+  "document_version": 1,
+  "instruction_summary": "Perkaya pembahasan definisi digitalisasi di Bab II menggunakan sumber yang tersedia dan gaya APA.",
+  "scope": {
+    "allowed_node_ids": [
+      "para_A1"
+    ],
+    "chapter_ids": [
+      "chapter_II"
+    ]
+  },
+  "operations": [
+    {
+      "operation_id": "op_001",
+      "type": "insert_paragraph_after",
+      "group_id": "grp_001",
+      "depends_on": [],
+      "target": {
+        "node_id": "para_A1",
+        "expected_text_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Digitalisasi tidak terbatas pada pemindahan aktivitas ke media daring, tetapi juga mencakup transformasi proses kerja dan pengelolaan informasi."
+        },
+        {
+          "type": "citation",
+          "reference_ids": [
+            "ref:doi:10.1234/example.001"
+          ],
+          "evidence_ids": [
+            "EV-001"
+          ],
+          "citation_mode": "parenthetical",
+          "locator": {
+            "label": "page",
+            "value": "17"
+          }
+        }
+      ],
+      "paragraph_style_policy": "inherit_anchor"
+    }
+  ],
+  "used_reference_ids": [
+    "ref:doi:10.1234/example.001"
+  ],
+  "used_evidence_ids": [
+    "EV-001"
+  ],
+  "unsupported_claims": [],
+  "warnings": [],
+  "assumptions": [
+    "Target paragraph is a conceptual definition paragraph."
+  ]
+}

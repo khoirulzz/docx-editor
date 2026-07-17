@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DocumentSession",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_id",
+    "owner_id",
+    "state",
+    "document_id",
+    "current_version",
+    "created_at",
+    "expires_at",
+    "privacy",
+    "capabilities"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "UPLOADING",
+        "INSPECTING",
+        "READY",
+        "PLANNING",
+        "PROPOSAL_READY",
+        "AWAITING_APPROVAL",
+        "VERIFICATION_FAILED",
+        "COMMITTED",
+        "EXPIRED",
+        "DELETED"
+      ]
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "current_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "zdr_required": {
+          "type": "boolean"
+        },
+        "content_logging": {
+          "const": false
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object"
+    }
+  }
+}

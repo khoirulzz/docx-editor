@@ -1,0 +1,318 @@
+{
+  "package": "ai-docx-editor-agent-workspace",
+  "version": "1.0.0",
+  "generated_at": "2026-07-17",
+  "file_count": 62,
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 2207,
+      "sha256": "dba1dc2494b7c4d43c51fa3dbe45c4eb1fb3b9678fa1c57ec5ab0cec54c3d497"
+    },
+    {
+      "path": "CHECKLIST.md",
+      "bytes": 793,
+      "sha256": "edb34be18a56c65cd448dc1ece1849c9fd54616b9bf6d719bc73f1c4f485a51a"
+    },
+    {
+      "path": "IMPLEMENTATION-BRIEF.md",
+      "bytes": 1623,
+      "sha256": "1f9082940c8a1a31e625f2465f807d106c4b4370a6e815ea5f137c534c0471cd"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3085,
+      "sha256": "c4b06db2e7e06169394bad6ffcd240ff3eb4e5a13760e32b78a3b986abf7b31a"
+    },
+    {
+      "path": "api/openapi.yaml",
+      "bytes": 8350,
+      "sha256": "58d02d73af01eeae5fba2caf3f0adfbae615eba0e1b6461dd6c5fe6025aa7896"
+    },
+    {
+      "path": "config/.env.example",
+      "bytes": 653,
+      "sha256": "94d4a3ee13a6e2506f6c6c5e2e6c7997082f7c73a56475441777e4dfb4d0b0e1"
+    },
+    {
+      "path": "config/capabilities.example.yaml",
+      "bytes": 706,
+      "sha256": "2c6532a6f04fcec1400584268fd290c6930ba71884c16355debbf8f86805a999"
+    },
+    {
+      "path": "decisions/ADR-001-llm-planner-deterministic-executor.md",
+      "bytes": 431,
+      "sha256": "2c9a18bae1f9fcbf29073c8876d9f33bfd6a8f8fbec915ea7d3a9bac1cd1c944"
+    },
+    {
+      "path": "decisions/ADR-002-stable-anchors.md",
+      "bytes": 300,
+      "sha256": "02d2cdc75134c18270708f56b28010d5d92f6289142fae5805b998f4b747aebe"
+    },
+    {
+      "path": "decisions/ADR-003-reference-intake-user-friendly.md",
+      "bytes": 260,
+      "sha256": "7120626b75a97e48416e3702e116db3b15bbd2f7e8cfd8086d908d50e0857ba3"
+    },
+    {
+      "path": "decisions/ADR-004-mendeley-capability-gate.md",
+      "bytes": 415,
+      "sha256": "b883fa9552759642014bb08f769ca9728d1a60959c5ee80a7a71cc6a0d1f3596"
+    },
+    {
+      "path": "decisions/ADR-005-semantic-not-byte-preservation.md",
+      "bytes": 380,
+      "sha256": "8ae5627994a224267b1e0057e79f4e170f3f7d36a2f6c90e715e4fcf839eb73b"
+    },
+    {
+      "path": "docs/00-product-scope.md",
+      "bytes": 3706,
+      "sha256": "deadeabd0bae082ead152e0da9e7d42dc41e02182c1e7baf2865078918b3cc5d"
+    },
+    {
+      "path": "docs/01-non-negotiable-requirements.md",
+      "bytes": 3666,
+      "sha256": "fade3ba18ca993e0a18cbd3185a2bb3c19fb8712496e1d8aa1de324ef3c6bbc0"
+    },
+    {
+      "path": "docs/02-architecture.md",
+      "bytes": 3518,
+      "sha256": "83a6d4d8cc92bf81b1ab913a388b867bb717a64584137d828353272e223d2692"
+    },
+    {
+      "path": "docs/03-docx-domain-model.md",
+      "bytes": 3875,
+      "sha256": "7cad4c0cf64027c1a3f8e0c3394079856746a7aa8b708d5810d41f55b15b8dbf"
+    },
+    {
+      "path": "docs/04-docx-inspection-parsing.md",
+      "bytes": 3102,
+      "sha256": "312c719149724078145fa832c1e1c1b4555d723889af27dbd2312e99c25d1dfa"
+    },
+    {
+      "path": "docs/05-edit-plan-protocol.md",
+      "bytes": 3258,
+      "sha256": "52f13a3802814e1c10b73e0b2a1fce09af59650dea7eca9feb6135fd9376aff4"
+    },
+    {
+      "path": "docs/06-deterministic-executor.md",
+      "bytes": 3382,
+      "sha256": "332b12dfc9d9c7c9563b0b202d0bf6c1eb7e1cb46813014567923d8fc47da383"
+    },
+    {
+      "path": "docs/07-reference-intake-evidence.md",
+      "bytes": 3962,
+      "sha256": "ad770c2c43c8b8b4eda278fd8996cf44ac6804fd32603c77d1f0900e7d14bda7"
+    },
+    {
+      "path": "docs/08-citation-mendeley-compatibility.md",
+      "bytes": 4146,
+      "sha256": "b091ace918a3d011a92bc12c78872bb49c0664bd5ae7bbcc5512a5d577763baf"
+    },
+    {
+      "path": "docs/09-verification-invariants.md",
+      "bytes": 2636,
+      "sha256": "e284ca347503df361f15ecfc7d94f3f30421b55ed904532c501ffc868655b15d"
+    },
+    {
+      "path": "docs/10-security-privacy-threat-model.md",
+      "bytes": 2840,
+      "sha256": "92c48cc5edfeb52518c8b7e1367434cde6e90ac041d7b3a19bfb05b31b537ef7"
+    },
+    {
+      "path": "docs/11-api-contract.md",
+      "bytes": 2143,
+      "sha256": "c057a10845ae914e43d3529599022bed2699cbeeab9ba72301989f66aad555ec"
+    },
+    {
+      "path": "docs/12-frontend-ux.md",
+      "bytes": 1827,
+      "sha256": "8215c3715f593120ea78d3f34ef2c28674a5c1db3456948ea73874523d7e71db"
+    },
+    {
+      "path": "docs/13-session-versioning-storage.md",
+      "bytes": 1639,
+      "sha256": "006a387cedb8381511b4ce310917aeb41a90822f79ac0b8b7ebdf3ba0fd8c6ae"
+    },
+    {
+      "path": "docs/14-llm-orchestration.md",
+      "bytes": 2285,
+      "sha256": "5af1c228e4a012fa38deae95566689cb40e069800eab33da0c3ed37889a971b6"
+    },
+    {
+      "path": "docs/15-testing-fixtures.md",
+      "bytes": 2161,
+      "sha256": "7707ae28289f3935c72bb8872f38a74b671a1e2fc411dbcdab2aa7d7d23349f1"
+    },
+    {
+      "path": "docs/16-deployment-hf-spaces.md",
+      "bytes": 1865,
+      "sha256": "2729279dd3bb2ff35cdd40694120d932aa6639a1af939ab2dd416c22b3ce0559"
+    },
+    {
+      "path": "docs/17-observability-errors.md",
+      "bytes": 1259,
+      "sha256": "0d692f1459dfe581d5e9c424625b5a307085eaf05f069e5b23be8ae0ae7153a5"
+    },
+    {
+      "path": "docs/18-implementation-plan.md",
+      "bytes": 2914,
+      "sha256": "3f5a3a8c60193709b73c06a7ed23ff48a2a697e5e0bf0637fa88b2174680280e"
+    },
+    {
+      "path": "docs/19-definition-of-done.md",
+      "bytes": 1279,
+      "sha256": "12b639c5253d77fb0e75dd5e774560493bd6fce87fdb40661493545ea4992884"
+    },
+    {
+      "path": "docs/20-source-register.md",
+      "bytes": 3229,
+      "sha256": "c371794d5b073f864c8c1c84e85038e6bb066bf871e40f1b5cf4987ebde34863"
+    },
+    {
+      "path": "docs/21-algorithms-pseudocode.md",
+      "bytes": 6817,
+      "sha256": "b13ff08d128c7993c80ca0ea5ba287d172be9d6d5761ef6e88c274482fccb5a5"
+    },
+    {
+      "path": "docs/22-persistence-data-model.md",
+      "bytes": 2748,
+      "sha256": "00c1003b529a8bee4e288c82cf0f481ebcb971a7dcb7629d113a8116d7bc7ba8"
+    },
+    {
+      "path": "docs/23-native-mendeley-rnd-protocol.md",
+      "bytes": 2444,
+      "sha256": "cba9a327963f24403116a00639bcd6fd69445d639dc86e51350159b7810136c7"
+    },
+    {
+      "path": "docs/24-agent-execution-runbook.md",
+      "bytes": 1575,
+      "sha256": "f68a0e89b5972d7db757d689331e10761cf6970585f9456afc735d5dbc023e47"
+    },
+    {
+      "path": "docs/25-configuration-policy.md",
+      "bytes": 1464,
+      "sha256": "143aa0f792c462d7e65cb5fae9a4a1ccd83d8440705766e2029dfee238c323ac"
+    },
+    {
+      "path": "examples/edit-plan.json",
+      "bytes": 1514,
+      "sha256": "48c4411d1d5fde849a455a032c4810b7e209ba23b9350290f5afcc2227109e10"
+    },
+    {
+      "path": "examples/reference-notes-unstructured.md",
+      "bytes": 932,
+      "sha256": "7cfff40853c19c256b198836b767ae62391aa4cc7a18e88d63a88dec6bd72e22"
+    },
+    {
+      "path": "examples/reference-pack-normalized.json",
+      "bytes": 3084,
+      "sha256": "cb981f000c2ecd169a3637998b1fa018fd4a5bebc85c73d21862356c92306a61"
+    },
+    {
+      "path": "examples/user-workflow.md",
+      "bytes": 1272,
+      "sha256": "4b15498f529f64acc98ace9a40da8cf629e39895e3e4826f637ad443b63cd587"
+    },
+    {
+      "path": "legacy/blueprint-ai-docx-editor-original.md",
+      "bytes": 7001,
+      "sha256": "4b611d4ff6955e420802c75ab13e8af19f2df0184c43b53a49315a0d3c51801b"
+    },
+    {
+      "path": "legacy/lampiran-schema-json-original.md",
+      "bytes": 5040,
+      "sha256": "b8a4271521999027a55c7813dbd9236539afcc7d436e6efcacf3989f9b099fd7"
+    },
+    {
+      "path": "prompts/recovery.md",
+      "bytes": 369,
+      "sha256": "25e6e756d26b5df485e7d42f652a6acd5471693f55a13e8006cd0b2c3787850d"
+    },
+    {
+      "path": "prompts/reference-intake.md",
+      "bytes": 856,
+      "sha256": "bfadba689148c0650738046b97f3fe16d2043c649dfeb9e7138bd00e94ef5a81"
+    },
+    {
+      "path": "prompts/scope-selector.md",
+      "bytes": 397,
+      "sha256": "31cad9f5d8477055208967e1d6d952636d9b3b33bf2ecff0a7f334e423428428"
+    },
+    {
+      "path": "prompts/semantic-verifier.md",
+      "bytes": 453,
+      "sha256": "f50d2e160404c13753ce31dd75f8384a36e0185feec7ffca338ec6c37df76d2b"
+    },
+    {
+      "path": "prompts/system-planner.md",
+      "bytes": 1503,
+      "sha256": "db98bb54ae22852f25490781c71436c5078219863b6ce2ace339f1df1058e9d8"
+    },
+    {
+      "path": "schemas/citation-manifest.schema.json",
+      "bytes": 1947,
+      "sha256": "213adba2b2201b030a6519ba00e9870a6268d4661410e092875f3c19c5e8feb1"
+    },
+    {
+      "path": "schemas/document-graph.schema.json",
+      "bytes": 2357,
+      "sha256": "407b582a76021d37e57cf57ad84fa1025ba6ad2fc577f5322b1a657d5431bfcb"
+    },
+    {
+      "path": "schemas/edit-plan.schema.json",
+      "bytes": 11459,
+      "sha256": "0534b6ddc4ad46a107c10e00b1698936c06ac5a48f727736e7a35e105f793fc0"
+    },
+    {
+      "path": "schemas/proposal.schema.json",
+      "bytes": 1156,
+      "sha256": "6696a1c0dfc895bf02e1df0734b3258dde34a7c2d1e2c6e4cc9c64b50728dafd"
+    },
+    {
+      "path": "schemas/reference-pack.schema.json",
+      "bytes": 6075,
+      "sha256": "9bbd7c67df6f79b815b7e153acc0bd881a7f1b19a0ef502963ac993f5b5e2493"
+    },
+    {
+      "path": "schemas/session.schema.json",
+      "bytes": 1260,
+      "sha256": "bf4fcc2fe08b4e95a4b7ccf747e99cdf4c211e4352fdbde87903c8166278868e"
+    },
+    {
+      "path": "schemas/verification-report.schema.json",
+      "bytes": 1963,
+      "sha256": "32502334505fd0d45ea670571990d53f0ae9436c2c99490da11b4ed21c4cac81"
+    },
+    {
+      "path": "skills/docx-executor-review/SKILL.md",
+      "bytes": 648,
+      "sha256": "14219469cf792ea51caf1df06aab270d617c59d6e78644526e11d5b136b60250"
+    },
+    {
+      "path": "skills/docx-inspector/SKILL.md",
+      "bytes": 766,
+      "sha256": "1f064e1a506cc90edbccb44c6cea5d16dcac048cd8d5743731092c1545b63a55"
+    },
+    {
+      "path": "skills/edit-planner/SKILL.md",
+      "bytes": 684,
+      "sha256": "ff344fb3f936750acebb0795f8af2fa407de8a865e9e6d94cb651a2f83b6ff6c"
+    },
+    {
+      "path": "skills/reference-intake/SKILL.md",
+      "bytes": 707,
+      "sha256": "5b444a279e404610d7c3377ff50a4c54a2a08baa8310f5242a3877e5cac358d7"
+    },
+    {
+      "path": "skills/verification/SKILL.md",
+      "bytes": 602,
+      "sha256": "ddcd3efe5f6d1e845bb5b0d4c0c936e234ae922aa4a7ce7628e15cef01323288"
+    },
+    {
+      "path": "tests/fixture-manifest.yaml",
+      "bytes": 1682,
+      "sha256": "6a568c986ffbc4fa6609ff7e3fcfdd64507db74d1a871f650f010723f70a8878"
+    }
+  ]
+}

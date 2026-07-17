@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DocumentGraph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "document_id",
+    "version",
+    "package_sha256",
+    "nodes",
+    "fields",
+    "chapters",
+    "capabilities"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "document-graph/1.0"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "package_sha256": {
+      "type": "string"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "node_id",
+          "node_type",
+          "story_id",
+          "ordinal",
+          "text",
+          "text_hash",
+          "features",
+          "editability"
+        ],
+        "properties": {
+          "node_id": {
+            "type": "string"
+          },
+          "node_type": {
+            "enum": [
+              "paragraph",
+              "table",
+              "row",
+              "cell",
+              "content_control"
+            ]
+          },
+          "story_id": {
+            "type": "string"
+          },
+          "ordinal": {
+            "type": "integer"
+          },
+          "para_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "locator": {
+            "type": "object"
+          },
+          "text": {
+            "type": "string"
+          },
+          "text_hash": {
+            "type": "string"
+          },
+          "style_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "outline_level": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "parent_node_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "features": {
+            "type": "object"
+          },
+          "editability": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "capabilities": {
+      "type": "object"
+    }
+  }
+}

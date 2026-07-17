@@ -1,0 +1,41 @@
+version: 1
+suites:
+  inspection:
+    - id: plain-indonesian-chapters
+      file: fixtures/plain-indonesian-chapters.docx
+      asserts: [chapter_detection, stable_nodes, visible_text]
+    - id: complex-fields-nested
+      file: fixtures/complex-fields-nested.docx
+      asserts: [field_stack_balanced, field_fingerprints]
+    - id: malformed-field
+      file: fixtures/malformed-field.docx
+      asserts: [blocking_warning, protected_mode]
+  executor:
+    - id: span-across-runs-safe
+      file: fixtures/mixed-runs.docx
+      operation: examples/edit-plan-span.json
+      asserts: [visible_text_expected, formatting_preserved, openxml_no_new_errors]
+    - id: reject-field-overlap
+      file: fixtures/legacy-mendeley.docx
+      asserts: [plan_policy_rejected]
+  references:
+    - id: messy-notes-id
+      file: examples/reference-notes-unstructured.md
+      asserts: [no_metadata_hallucination, prompt_injection_ignored, unresolved_yusuf]
+  security:
+    - id: zip-traversal
+      file: fixtures/security/zip-traversal.docx
+      asserts: [upload_rejected]
+    - id: zip-bomb
+      file: fixtures/security/high-ratio.docx
+      asserts: [archive_limit_rejected]
+    - id: xxe
+      file: fixtures/security/xxe.docx
+      asserts: [no_entity_resolution, upload_rejected_or_safe]
+  mendeley_qualification:
+    - id: legacy-single-citation
+      file: fixtures/mendeley/legacy-single.docx
+      required_manual_steps: [open_word, select_citation, edit_locator, change_style, refresh, save_reopen]
+    - id: modern-cite-single
+      file: fixtures/mendeley/modern-single.docx
+      required_manual_steps: [open_word, select_citation, edit_locator, change_style, refresh, save_reopen]

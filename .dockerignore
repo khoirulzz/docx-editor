@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.env
+.git
+.gitignore
+tests/
+brain/
+scratch/
+*.md
+!README.md
