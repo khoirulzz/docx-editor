@@ -7,6 +7,7 @@ from app.api.sessions import router as sessions_router
 from app.api.references import router as references_router
 from app.api.proposals import router as proposals_router
 from app.api.versions import router as versions_router
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.chat import router as chat_router
 
 app = FastAPI(
@@ -14,6 +15,16 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
+)
+
+# Enable CORS for external UI hosting (Cloudflare Pages, Vercel, localhost)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["X-Request-ID"]
 )
 
 # Register exception handlers
