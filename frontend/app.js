@@ -186,7 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.detail || `Upload gagal dengan status HTTP ${res.status}`);
+                const errMsg = (errData.error && errData.error.message) || errData.detail || errData.message || `Upload gagal dengan status HTTP ${res.status}`;
+                throw new Error(errMsg);
             }
 
             const data = await res.json();
@@ -281,7 +282,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.detail || `Chat API returned status ${res.status}`);
+                    const errMsg = (errData.error && errData.error.message) || errData.detail || errData.message || `Chat API returned status ${res.status}`;
+                    throw new Error(errMsg);
                 }
 
                 const data = await res.json();
@@ -399,7 +401,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.detail || `Commit gagal dengan status ${res.status}`);
+                    const errMsg = (errData.error && errData.error.message) || errData.detail || errData.message || `Commit gagal dengan status ${res.status}`;
+                    throw new Error(errMsg);
                 }
 
                 const data = await res.json();
