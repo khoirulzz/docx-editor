@@ -9,7 +9,7 @@ from app.core.errors import PreconditionFailedError
 router = APIRouter(prefix="/sessions", tags=["versions"])
 
 class CommitRequest(BaseModel):
-    commit_message: str
+    commit_message: str = "Applied changes"
     user_id: Optional[str] = "system"
 
 class VersionSummary(BaseModel):
@@ -20,7 +20,8 @@ class VersionSummary(BaseModel):
     commit_message: str
 
 @router.post("/{session_id}/proposals/{proposal_id}/commit", response_model=VersionSummary)
-def commit_proposal(session_id: str, proposal_id: str, req: CommitRequest):
+def commit_proposal(session_id: str, proposal_id: str, req: Optional[CommitRequest] = None):
+    req = req or CommitRequest()
     session = session_store.get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found.")

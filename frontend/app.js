@@ -474,12 +474,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/proposals/${currentProposalId}/commit`, {
-                    method: "POST"
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ commit_message: "Applied proposal revisions via UI" })
                 });
 
                 if (!res.ok) {
                     const errData = await res.json().catch(() => ({}));
-                    const errMsg = (errData.error && errData.error.message) || errData.detail || errData.message || `Commit gagal dengan status ${res.status}`;
+                    let errMsg = (errData.error && errData.error.message) || errData.message;
+                    if (!errMsg && Array.isArray(errData.detail)) {
+                        errMsg = errData.detail.map(d => `${d.loc ? d.loc.join('.') : ''}: ${d.msg}`).join(', ');
+                    } else if (!errMsg) {
+                        errMsg = typeof errData.detail === 'string' ? errData.detail : `Commit gagal dengan status ${res.status}`;
+                    }
                     throw new Error(errMsg);
                 }
 
