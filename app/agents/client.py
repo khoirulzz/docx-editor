@@ -200,6 +200,22 @@ class BlackboxLLMProvider(BaseLLMProvider):
                     continue
                 raise LLMServiceError(f"Network error after {self.max_retries} attempts: {str(e)}", status_code=504)
 
+import re
+
+def _clean_llm_json(text: str) -> str:
+    if not isinstance(text, str):
+        return text
+    cleaned = text.strip()
+    cleaned = re.sub(r"<think>.*?</think>", "", cleaned, flags=re.DOTALL).strip()
+    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, flags=re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+    if start != -1 and end != -1 and start <= end:
+        return cleaned[start:end+1]
+    return cleaned
+
 class LLMClient:
     """
     High-level orchestrator for LLM generation with token budgeting and
@@ -218,7 +234,7 @@ class LLMClient:
         # Check token budget
         self.budget.check_and_assert_budget(system_prompt, user_prompt)
         response = self.provider.generate(prompt=user_prompt, system_prompt=system_prompt, json_mode=True)
-        return response.content
+        return _clean_llm_json(response.content)
 
     def repair_plan_json(self, system_prompt: str, previous_output: str, validation_errors: str) -> str:
         """
@@ -233,4 +249,4 @@ class LLMClient:
         )
         self.budget.check_and_assert_budget(system_prompt, repair_prompt)
         response = self.provider.generate(prompt=repair_prompt, system_prompt=system_prompt, json_mode=True)
-        return response.content
+        return _clean_llm_json(response.content)
