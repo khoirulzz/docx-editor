@@ -9,11 +9,11 @@ from app.core.errors import PlanValidationError
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_RULES_PREFIX = """You are the AI DOCX Academic Editor (EditPlannerAgent).
+SYSTEM_RULES_PREFIX = """You are the AI DOCX Academic & Professional Editor (EditPlannerAgent), an intelligent agent (like ChatGPT/Claude Pro Plus) designed to flexibly edit, expand, rewrite, modify, or format .docx documents based on user instructions.
 Your SOLE responsibility is to output a single JSON object conforming strictly to the EditPlan schema.
 NEVER output raw XML, XPath, file paths, or arbitrary markdown commentary outside the JSON object.
 Every text change or paragraph insertion must be represented by deterministic, typed operations inside the JSON.
-All citations must reference exact normalized IDs provided in the references section (no hallucinated sources or IDs)."""
+If the user instruction asks to add citations, only use exact normalized IDs provided in the references section. If the user instruction is general text editing, clarification, expanding, or rewriting (without requesting new citations), keep used_reference_ids empty ([]) and focus flexibly on the user's editing intent."""
 
 EDIT_PLAN_SCHEMA_PROMPT = """JSON Output Specification (EditPlan):
 Your response MUST be a JSON object containing:
@@ -26,16 +26,17 @@ Your response MUST be a JSON object containing:
   * replace_text_span: { "type": "replace_text_span", "operation_id": "op_1", "target": { "node_id": "para_X", "expected_text_hash": "sha256:will_be_resolved" }, "expected_text": "Exact substring to replace", "replacement_content": [ { "type": "text", "text": "New text string" } ] }
   * insert_paragraph_after: { "type": "insert_paragraph_after", "operation_id": "op_2", "target": { "node_id": "para_X" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
   * insert_paragraph_before: { "type": "insert_paragraph_before", "operation_id": "op_3", "target": { "node_id": "para_X" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
-- used_reference_ids: array of reference ID strings (e.g. ["REF-001"]) used in citations
-- used_evidence_ids: array of evidence ID strings
+- used_reference_ids: array of reference ID strings (MUST be [] when performing general edits without adding citations)
+- used_evidence_ids: array of evidence ID strings (usually [])
 - unsupported_claims: array of { "claim": string, "reason": string }
 - warnings: array of strings
 - assumptions: array of strings"""
 
 POLICY_SUMMARY = """Document Policy & Guidelines:
-1. Maintain academic tone and standard Indonesian/English academic conventions.
-2. Do not modify protected boundaries or existing legacy Mendeley/Cite fields unless explicitly instructed.
-3. Keep operations focused and minimal."""
+1. Act flexibly to fulfill any user editing request (rewriting, clarifying, expanding, academic formatting, etc.).
+2. Maintain academic or professional tone as appropriate for the document.
+3. Do not modify protected boundaries or existing legacy Mendeley/Cite fields unless explicitly instructed.
+4. If no references are provided or needed for the edit, used_reference_ids MUST be []."""
 
 class EditPlannerAgent:
     """

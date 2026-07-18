@@ -51,12 +51,17 @@ class PlanGateway:
 
         # Semantic check: no hallucinated references
         if available_reference_ids is not None:
-            avail_set = set(available_reference_ids)
-            for ref_id in plan.used_reference_ids:
-                if ref_id not in avail_set:
-                    raise PlanValidationError(
-                        f"Hallucinated reference ID: {ref_id}. Must only use provided reference IDs.",
-                        details={"hallucinated_id": ref_id}
-                    )
+            if len(available_reference_ids) == 0:
+                # If no reference store is active/uploaded, any ID in used_reference_ids (e.g. dummy REF-001 from prompt example)
+                # is sanitized out so general docx editing/rewriting proceeds smoothly without false positive hallucination errors.
+                plan.used_reference_ids = []
+            else:
+                avail_set = set(available_reference_ids)
+                for ref_id in plan.used_reference_ids:
+                    if ref_id not in avail_set:
+                        raise PlanValidationError(
+                            f"Hallucinated reference ID: {ref_id}. Must only use provided reference IDs.",
+                            details={"hallucinated_id": ref_id}
+                        )
 
         return plan
