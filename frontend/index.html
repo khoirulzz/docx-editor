@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI DOCX Academic Editor — Studio Revisi & Sitasi</title>
-    <meta name="description" content="Platform asisten AI untuk pengeditan dokumen akademis .docx dengan perlindungan Office Open XML dan kepatuhan sitasi Mendeley / APA 7th.">
+    <meta name="description" content="Asisten AI profesional untuk pengeditan dokumen akademis .docx dengan perlindungan Office Open XML dan kepatuhan sitasi Mendeley / APA 7th.">
     
-    <!-- Google Fonts: Outfit & Inter -->
+    <!-- Google Fonts: Inter & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,39 +15,42 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Top Navigation Header -->
-    <header class="navbar glass-header">
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
         <div class="nav-brand">
-            <div class="logo-icon">📝</div>
+            <div class="logo-box">
+                <span class="logo-icon">✨</span>
+            </div>
             <div class="brand-text">
-                <h1>AI DOCX <span class="gradient-text">Academic Editor</span></h1>
-                <span class="badge badge-version">v1.0.0 Pro</span>
+                <h1>AI DOCX <span class="brand-sub">Academic Editor</span></h1>
+                <span class="badge badge-pro">PRO STUDIO</span>
             </div>
         </div>
         
-        <div class="nav-status">
+        <div class="nav-controls">
+            <!-- Server Health Badge -->
             <div id="serverHealthBadge" class="health-badge status-checking" title="Status koneksi ke server Render">
                 <span class="pulse-dot"></span>
                 <span class="health-label">Memeriksa Server...</span>
             </div>
             
-            <button id="settingsBtn" class="btn btn-icon" title="Konfigurasi API Endpoint">
-                ⚙️ <span class="btn-text">API Config</span>
+            <button id="settingsBtn" class="btn btn-outline-sm" title="Konfigurasi API Endpoint">
+                ⚙️ API Config
             </button>
         </div>
     </header>
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal hidden">
-        <div class="modal-content glass-card">
+        <div class="modal-card">
             <div class="modal-header">
                 <h3>⚙️ Konfigurasi Backend API</h3>
                 <button id="closeSettingsBtn" class="btn-close">✕</button>
             </div>
             <div class="modal-body">
-                <label for="apiBaseInput">API Base URL (Server Render):</label>
-                <div class="input-group">
-                    <input type="text" id="apiBaseInput" value="https://docx-editor-8v0s.onrender.com" placeholder="https://your-app.onrender.com">
+                <label for="apiBaseInput" class="form-label">API Base URL (Server Render):</label>
+                <div class="input-row">
+                    <input type="text" id="apiBaseInput" class="form-input" value="https://docx-editor-8v0s.onrender.com" placeholder="https://your-app.onrender.com">
                     <button id="resetApiBtn" class="btn btn-secondary">Default</button>
                 </div>
                 <p class="helper-text">Masukkan URL server backend Anda di Render atau <code>http://localhost:7860</code> untuk pengujian lokal.</p>
@@ -58,63 +61,83 @@
         </div>
     </div>
 
-    <!-- Main Workspace Grid -->
+    <!-- Main Workspace Grid (Strict Viewport Height Isolation) -->
     <main class="workspace-grid">
         <!-- LEFT PANEL: Upload & Document Outline -->
-        <aside class="panel left-panel glass-card">
+        <aside class="panel left-panel">
             <div class="panel-header">
-                <h2>📁 Workspace Dokumen</h2>
-                <span id="sessionBadge" class="badge badge-neutral hidden">No Session</span>
+                <div class="header-title">
+                    <span class="panel-icon">📁</span>
+                    <h2>Dokumen & Struktur</h2>
+                </div>
+                <span id="sessionBadge" class="badge badge-light hidden">No Session</span>
             </div>
 
-            <!-- Upload Dropzone -->
-            <div id="uploadContainer" class="upload-box">
-                <input type="file" id="docxFileInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
-                <div class="upload-trigger" id="dropzone">
-                    <div class="upload-icon">📄</div>
-                    <h3>Upload Dokumen .docx</h3>
-                    <p>Drag & drop file di sini, atau <span class="browse-link">klik untuk memilih</span></p>
-                    <div class="upload-meta">Maksimal 50 MB • Mempertahankan sitasi Mendeley & tabel asli</div>
+            <div class="panel-body left-panel-body">
+                <!-- Upload Dropzone Container -->
+                <div id="uploadContainer" class="upload-section">
+                    <input type="file" id="docxFileInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+                    <div class="upload-dropzone" id="dropzone">
+                        <div class="dropzone-icon">📄</div>
+                        <h3>Unggah Dokumen .docx</h3>
+                        <p>Drag & drop file di sini, atau <span class="browse-link">pilih dari folder</span></p>
+                        <div class="dropzone-features">
+                            <span>✔ Maksimal 50 MB</span>
+                            <span>✔ Aman untuk Sitasi Mendeley</span>
+                        </div>
+                    </div>
+                    <div id="uploadProgress" class="progress-card hidden">
+                        <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+                        <span id="progressText" class="progress-label">Menginspeksi paket Office Open XML...</span>
+                    </div>
                 </div>
-                <div id="uploadProgress" class="progress-container hidden">
-                    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
-                    <span id="progressText" class="progress-label">Menganalisis struktur Office Open XML...</span>
+
+                <!-- Active Document Info Card (Shown after upload) -->
+                <div id="activeDocCard" class="doc-card hidden">
+                    <div class="doc-card-top">
+                        <div class="doc-badge-icon">W</div>
+                        <div class="doc-meta">
+                            <h4 id="docFileName" title="dokumen.docx">dokumen-akademik.docx</h4>
+                            <span class="doc-tag">DOCX</span>
+                        </div>
+                        <button id="newUploadBtn" class="btn-icon-ghost" title="Ganti Dokumen">🔄</button>
+                    </div>
+                    <div class="doc-card-stats">
+                        <span id="docStats">0 Paragraf • 0 Bab</span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Active Document Card (Shown after upload) -->
-            <div id="activeDocCard" class="doc-summary-card hidden">
-                <div class="doc-icon">📑</div>
-                <div class="doc-info">
-                    <h4 id="docFileName">dokumen-akademik.docx</h4>
-                    <span id="docStats" class="doc-stats">0 paragraf • 0 bab</span>
-                </div>
-                <button id="newUploadBtn" class="btn btn-sm btn-ghost" title="Ganti Dokumen">🔄</button>
-            </div>
+                <div class="section-divider"></div>
 
-            <hr class="divider">
-
-            <!-- Document Outline Tree (DocumentGraph) -->
-            <div class="outline-section">
-                <h3>📑 Struktur Bab & Heading</h3>
-                <div id="outlineTree" class="outline-tree">
-                    <div class="empty-state">
-                        <span>Belum ada dokumen yang diunggah. Unggah file .docx untuk melihat struktur bab dan paragraf.</span>
+                <!-- Document Outline List (Independently Scrollable) -->
+                <div class="outline-wrapper">
+                    <div class="outline-header">
+                        <h3>📑 Navigasi Bab & Paragraf</h3>
+                        <span class="helper-badge" title="Klik item untuk memilih target revisi">Klik = Target</span>
+                    </div>
+                    <div id="outlineTree" class="outline-scroll-container">
+                        <div class="empty-state">
+                            <span>Belum ada dokumen. Unggah file .docx untuk menguraikan struktur bab dan paragraf.</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- CENTER PANEL: AI Assistant Chat & Instruction -->
-        <section class="panel center-panel glass-card">
-            <div class="panel-header">
-                <div class="chat-header-info">
-                    <h2>🤖 Asisten Revisi Akademis</h2>
-                    <span class="model-badge">Model: deepseek-v4-pro</span>
+        <!-- CENTER PANEL: AI Assistant Chat & Floating Input Area -->
+        <section class="panel center-panel">
+            <!-- Chat Header -->
+            <div class="panel-header chat-header">
+                <div class="chat-header-left">
+                    <div class="assistant-status-dot"></div>
+                    <div>
+                        <h2>Asisten Revisi Akademis</h2>
+                        <span class="sub-label">Model: deepseek-v4-pro • ZDR Privacy Protected</span>
+                    </div>
                 </div>
-                <div class="style-selector">
+                <div class="citation-style-box">
                     <label for="citationStyle">Format Sitasi:</label>
-                    <select id="citationStyle" class="select-input">
+                    <select id="citationStyle" class="select-sm">
                         <option value="APA 7th">APA 7th Edition</option>
                         <option value="IEEE">IEEE Reference</option>
                         <option value="Harvard">Harvard Style</option>
@@ -123,89 +146,92 @@
                 </div>
             </div>
 
-            <!-- Chat Messages Log -->
-            <div id="chatMessages" class="chat-messages">
+            <!-- Chat Messages Area (Independently Scrollable) -->
+            <div id="chatMessages" class="chat-messages-scroll">
                 <div class="message assistant-msg">
-                    <div class="msg-avatar">🤖</div>
-                    <div class="msg-content">
-                        <h4>Selamat datang di AI DOCX Academic Editor!</h4>
-                        <p>Saya siap membantu Anda merevisi, memparafrase, memperbaiki tata bahasa akademis, atau menambahkan sitasi pada dokumen <code>.docx</code> Anda tanpa merusak struktur Office Open XML maupun sitasi Mendeley yang sudah ada.</p>
-                        <p><strong>Silakan unggah dokumen Anda di panel kiri untuk memulai.</strong></p>
+                    <div class="msg-avatar assistant-avatar">✨</div>
+                    <div class="msg-bubble">
+                        <h4>Halo! Saya Asisten AI DOCX Academic Editor Anda.</h4>
+                        <p>Saya siap membantu Anda merevisi pendahuluan, memparafrase paragraf, memperkuat tata bahasa akademis, hingga menambahkan sitasi dan daftar pustaka pada dokumen `.docx` Anda secara aman.</p>
+                        <p><strong>Silakan unggah dokumen Anda di panel kiri untuk memulai analisis.</strong></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Chat Input Controls -->
-            <div class="chat-input-area">
-                <div class="scope-row">
-                    <label for="targetScope">🎯 Target Revisi:</label>
-                    <select id="targetScope" class="select-input scope-select">
+            <!-- Floating Chat Input Bar (Never Hidden / Strictly Docked) -->
+            <div class="chat-footer">
+                <div class="target-scope-bar">
+                    <span class="scope-label">🎯 Target Scope:</span>
+                    <select id="targetScope" class="select-scope">
                         <option value="all">Seluruh Dokumen (Otomatis deteksi bab)</option>
-                        <!-- Dynamic chapters will be appended here -->
                     </select>
                 </div>
-                <form id="chatForm" class="chat-form">
-                    <textarea id="instructionInput" placeholder="Tulis instruksi revisi Anda di sini... (Contoh: 'Tolong perbaiki gaya bahasa pada bab Abstrak agar lebih akademis formal dan tambahkan sitasi mengenai AI')" rows="2" disabled></textarea>
-                    <button type="submit" id="sendBtn" class="btn btn-send" disabled>
+                <form id="chatForm" class="chat-input-pill">
+                    <textarea id="instructionInput" placeholder="Tanyakan atau berikan instruksi revisi... (Contoh: 'Tolong perbaiki gaya bahasa bab Abstrak agar formal & tambahkan sitasi mengenai AI')" rows="1" disabled></textarea>
+                    <button type="submit" id="sendBtn" class="btn-send-circle" disabled title="Kirim Instruksi">
                         <span class="send-icon">🚀</span>
-                        <span class="send-text">Kirim</span>
                     </button>
                 </form>
             </div>
         </section>
 
-        <!-- RIGHT PANEL: Proposal Review & Verification L1-L5 -->
-        <aside class="panel right-panel glass-card">
+        <!-- RIGHT PANEL: Proposal Review, Diff & L1-L5 Safety Verification -->
+        <aside class="panel right-panel">
             <div class="panel-header">
-                <h2>🛡️ Review Proposal & Verifikasi</h2>
-                <span id="proposalBadge" class="badge badge-neutral">Menunggu Instruksi</span>
+                <div class="header-title">
+                    <span class="panel-icon">🛡️</span>
+                    <h2>Review Proposal & Verifikasi</h2>
+                </div>
+                <span id="proposalBadge" class="badge badge-light">Menunggu Instruksi</span>
             </div>
 
-            <div id="proposalContainer" class="proposal-container">
+            <!-- Proposals Container (Independently Scrollable) -->
+            <div id="proposalContainer" class="proposal-scroll-container">
                 <div class="empty-state">
-                    <div class="shield-icon">🔐</div>
+                    <div class="shield-graphic">🔐</div>
                     <h3>Belum ada proposal aktif</h3>
-                    <p>Setelah Anda mengirim instruksi chat, sistem AI akan menyusun rencana perubahan beserta verifikasi keamanan 5 lapisan (L1-L5).</p>
+                    <p>Setelah Anda mengirim instruksi chat, sistem AI akan menyusun rencana perubahan deterministik beserta verifikasi keamanan 5 lapisan (L1-L5).</p>
                 </div>
             </div>
 
-            <!-- Verification & Action Footer -->
+            <!-- Verification Checks & Commit Footer (Docked when active) -->
             <div id="proposalFooter" class="proposal-footer hidden">
-                <div class="verification-checks">
-                    <div class="check-item passed" title="L1: OPC Package & Content Types Valid">
-                        <span class="check-icon">✓</span> L1 Package
+                <div class="verification-grid">
+                    <div class="verify-pill passed" title="L1: OPC Package & Content Types Valid">
+                        <span class="check">✔</span> L1 Package
                     </div>
-                    <div class="check-item passed" title="L2: Well-formed XML Structure">
-                        <span class="check-icon">✓</span> L2 XML
+                    <div class="verify-pill passed" title="L2: Well-formed XML Structure">
+                        <span class="check">✔</span> L2 XML
                     </div>
-                    <div class="check-item passed" title="L3/L4: Protected Boundaries & References Preserved">
-                        <span class="check-icon">✓</span> L3/L4 Safety
+                    <div class="verify-pill passed" title="L3/L4: Protected Boundaries & References Preserved">
+                        <span class="check">✔</span> L3/L4 Safety
                     </div>
-                    <div class="check-item passed" title="L5: Citation Hash Integrity Audit Passed">
-                        <span class="check-icon">✓</span> L5 Citation
+                    <div class="verify-pill passed" title="L5: Citation Hash Integrity Audit Passed">
+                        <span class="check">✔</span> L5 Citation Hash
                     </div>
                 </div>
 
-                <div class="action-buttons">
-                    <button id="rejectProposalBtn" class="btn btn-danger btn-block">✕ Tolak Proposal</button>
-                    <button id="commitProposalBtn" class="btn btn-success btn-block">✔ Setujui & Terapkan Perubahan</button>
+                <div class="proposal-actions">
+                    <button id="rejectProposalBtn" class="btn btn-outline-danger">✕ Tolak</button>
+                    <button id="commitProposalBtn" class="btn btn-success-gradient">✔ Setujui & Terapkan</button>
                 </div>
             </div>
 
             <!-- Download Export Card (Shown after commit) -->
             <div id="downloadCard" class="download-card hidden">
-                <div class="success-banner">
-                    <span>🎉 Revisi Berhasil Diterapkan!</span>
+                <div class="success-header">
+                    <span class="success-icon">🎉</span>
+                    <h4>Revisi Berhasil Diterapkan!</h4>
                 </div>
-                <p>Dokumen Anda telah diperbarui secara deterministik dengan menjaga integritas sitasi.</p>
-                <a id="downloadBtn" href="#" class="btn btn-primary btn-block btn-download" target="_blank">
+                <p>Dokumen Anda telah diperbarui secara deterministik dengan menjaga integritas tabel dan sitasi.</p>
+                <a id="downloadBtn" href="#" class="btn btn-download-gradient btn-block" target="_blank">
                     📥 Download DOCX Hasil Revisi (v<span id="newVersionNum">1</span>)
                 </a>
             </div>
         </aside>
     </main>
 
-    <!-- Notification Toast Container -->
+    <!-- Notification Toasts -->
     <div id="toastContainer" class="toast-container"></div>
 
     <script src="app.js"></script>

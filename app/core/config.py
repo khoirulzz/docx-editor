@@ -24,7 +24,7 @@ class Settings(BaseModel):
     # LLM & Resolver configuration
     BLACKBOX_API_KEY: str = Field(default="")
     BLACKBOX_API_BASE: str = Field(default="https://api.blackbox.ai")
-    BLACKBOX_MODEL: str = Field(default="deepseek-v4-pro")
+    BLACKBOX_MODEL: str = Field(default="blackboxai/deepseek/deepseek-v4-pro")
     BLACKBOX_ZDR_REQUIRED: bool = Field(default=True)
     CROSSREF_MAILTO: str = Field(default="")
     

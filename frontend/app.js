@@ -1,6 +1,6 @@
 /**
- * AI DOCX Academic Editor — Studio Revisi & Sitasi
- * Vanilla JavaScript Single-Page Application (Cloudflare Pages compatible)
+ * AI DOCX Academic Editor — Pro Studio Logic
+ * Vanilla JavaScript Single-Page Application (Cloudflare Pages / Light Studio UI)
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -50,9 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const toastContainer = document.getElementById("toastContainer");
 
     // Initialize API Base Input
-    apiBaseInput.value = apiBaseUrl;
+    if (apiBaseInput) apiBaseInput.value = apiBaseUrl;
 
-    // --- Toast Notification Helper ---
+    // --- Helper for Rstrip ---
+    String.prototype.rstrip = function (chars) {
+        let str = this;
+        while (str.endsWith(chars)) str = str.slice(0, -1);
+        return str;
+    };
+
+    // --- Toast Notification ---
     function showToast(message, type = "info") {
         const toast = document.createElement("div");
         toast.className = `toast toast-${type}`;
@@ -62,12 +69,13 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             toast.style.opacity = "0";
             toast.style.transform = "translateX(100%)";
-            setTimeout(() => toast.remove(), 300);
+            setTimeout(() => toast.remove(), 250);
         }, 4000);
     }
 
-    // --- Server Health Monitor ---
+    // --- Server Health Check ---
     async function checkHealth() {
+        if (!serverHealthBadge) return;
         serverHealthBadge.className = "health-badge status-checking";
         serverHealthBadge.innerHTML = `<span class="pulse-dot"></span><span class="health-label">Memeriksa Server...</span>`;
         try {
@@ -88,22 +96,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    String.prototype.rstrip = function (chars) {
-        let str = this;
-        while (str.endsWith(chars)) str = str.slice(0, -1);
-        return str;
-    };
-
     checkHealth();
     setInterval(checkHealth, 25000);
 
-    // --- Settings Modal Events ---
-    settingsBtn.addEventListener("click", () => settingsModal.classList.remove("hidden"));
-    closeSettingsBtn.addEventListener("click", () => settingsModal.classList.add("hidden"));
-    resetApiBtn.addEventListener("click", () => {
+    // --- Settings Modal ---
+    if (settingsBtn) settingsBtn.addEventListener("click", () => settingsModal.classList.remove("hidden"));
+    if (closeSettingsBtn) closeSettingsBtn.addEventListener("click", () => settingsModal.classList.add("hidden"));
+    if (resetApiBtn) resetApiBtn.addEventListener("click", () => {
         apiBaseInput.value = "https://docx-editor-8v0s.onrender.com";
     });
-    saveSettingsBtn.addEventListener("click", () => {
+    if (saveSettingsBtn) saveSettingsBtn.addEventListener("click", () => {
         let url = apiBaseInput.value.trim().rstrip("/");
         if (!url) url = "https://docx-editor-8v0s.onrender.com";
         apiBaseUrl = url;
@@ -114,39 +116,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- File Upload & Drag-and-Drop ---
-    dropzone.addEventListener("click", () => docxFileInput.click());
-    dropzone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropzone.classList.add("drag-over");
-    });
-    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag-over"));
-    dropzone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropzone.classList.remove("drag-over");
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleFileUpload(e.dataTransfer.files[0]);
-        }
-    });
-    docxFileInput.addEventListener("change", () => {
-        if (docxFileInput.files && docxFileInput.files[0]) {
-            handleFileUpload(docxFileInput.files[0]);
-        }
-    });
+    if (dropzone) {
+        dropzone.addEventListener("click", () => docxFileInput.click());
+        dropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropzone.classList.add("drag-over");
+        });
+        dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag-over"));
+        dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("drag-over");
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+    }
 
-    newUploadBtn.addEventListener("click", () => {
-        currentSessionId = null;
-        currentProposalId = null;
-        activeOperations = [];
-        activeDocCard.classList.add("hidden");
-        dropzone.classList.remove("hidden");
-        outlineTree.innerHTML = `<div class="empty-state"><span>Belum ada dokumen yang diunggah. Unggah file .docx untuk melihat struktur bab.</span></div>`;
-        sessionBadge.classList.add("hidden");
-        instructionInput.disabled = true;
-        sendBtn.disabled = true;
-        proposalContainer.innerHTML = `<div class="empty-state"><div class="shield-icon">🔐</div><h3>Belum ada proposal aktif</h3><p>Unggah dokumen dan kirim instruksi chat untuk menyusun revisi L1-L5.</p></div>`;
-        proposalFooter.classList.add("hidden");
-        downloadCard.classList.add("hidden");
-    });
+    if (docxFileInput) {
+        docxFileInput.addEventListener("change", () => {
+            if (docxFileInput.files && docxFileInput.files[0]) {
+                handleFileUpload(docxFileInput.files[0]);
+            }
+        });
+    }
+
+    if (newUploadBtn) {
+        newUploadBtn.addEventListener("click", () => {
+            currentSessionId = null;
+            currentProposalId = null;
+            activeOperations = [];
+            activeDocCard.classList.add("hidden");
+            dropzone.classList.remove("hidden");
+            outlineTree.innerHTML = `<div class="empty-state"><span>Belum ada dokumen. Unggah file .docx untuk menguraikan struktur bab dan paragraf.</span></div>`;
+            sessionBadge.classList.add("hidden");
+            instructionInput.disabled = true;
+            sendBtn.disabled = true;
+            proposalContainer.innerHTML = `<div class="empty-state"><div class="shield-graphic">🔐</div><h3>Belum ada proposal aktif</h3><p>Unggah dokumen dan kirim instruksi chat untuk menyusun revisi L1-L5.</p></div>`;
+            proposalFooter.classList.add("hidden");
+            downloadCard.classList.add("hidden");
+        });
+    }
 
     async function handleFileUpload(file) {
         if (!file.name.endsWith(".docx")) {
@@ -189,14 +198,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 uploadProgress.classList.add("hidden");
                 activeDocCard.classList.remove("hidden");
                 docFileName.innerText = file.name;
-                docStats.innerText = `Sesi Aktif: ${currentSessionId.slice(0, 8)}... • Siap Direvisi`;
+                docFileName.title = file.name;
+                docStats.innerText = `Sesi Aktif (${currentSessionId.slice(0, 8)}) • Siap Direvisi`;
                 sessionBadge.innerText = `Sesi: ${currentSessionId.slice(0, 8)}`;
                 sessionBadge.classList.remove("hidden");
                 instructionInput.disabled = false;
                 sendBtn.disabled = false;
                 showToast("Dokumen berhasil diunggah dan diinspeksi!", "success");
                 loadDocumentGraph();
-            }, 600);
+            }, 500);
 
         } catch (err) {
             uploadProgress.classList.add("hidden");
@@ -212,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!res.ok) return;
             const graph = await res.json();
 
-            // Populate outline tree and target scope options
             if (graph.nodes && graph.nodes.length > 0) {
                 outlineTree.innerHTML = "";
                 targetScope.innerHTML = `<option value="all">Seluruh Dokumen (Otomatis deteksi bab)</option>`;
@@ -222,18 +231,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     item.className = "outline-item";
                     item.innerHTML = `
                         <span><strong>#${idx + 1}</strong> ${node.text ? node.text.slice(0, 32) + (node.text.length > 32 ? "..." : "") : "Paragraf / Heading"}</span>
-                        <span class="para-count">${node.type || "para"}</span>
+                        <span class="para-badge">${node.type || "para"}</span>
                     `;
                     item.addEventListener("click", () => {
-                        instructionInput.value = `Tolong perbaiki paragraf ke-${idx + 1}: "${node.text ? node.text.slice(0, 40) : ""}"`;
+                        instructionInput.value = `Tolong perbaiki paragraf ke-${idx + 1}: "${node.text ? node.text.slice(0, 45) : ""}"`;
                         instructionInput.focus();
                     });
                     outlineTree.appendChild(item);
 
-                    // Add to dropdown
                     const opt = document.createElement("option");
                     opt.value = node.node_id;
-                    opt.innerText = `Paragraf #${idx + 1}: ${node.text ? node.text.slice(0, 25) : "Section"}`;
+                    opt.innerText = `Paragraf #${idx + 1}: ${node.text ? node.text.slice(0, 28) : "Section"}`;
                     targetScope.appendChild(opt);
                 });
             } else {
@@ -245,63 +253,64 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- Chat & Planning Events ---
-    chatForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const text = instructionInput.value.trim();
-        if (!text || !currentSessionId) return;
+    if (chatForm) {
+        chatForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const text = instructionInput.value.trim();
+            if (!text || !currentSessionId) return;
 
-        appendChatMessage("user", text);
-        instructionInput.value = "";
-        instructionInput.disabled = true;
-        sendBtn.disabled = true;
+            appendChatMessage("user", text);
+            instructionInput.value = "";
+            instructionInput.disabled = true;
+            sendBtn.disabled = true;
 
-        const loadingId = appendChatMessage("assistant", "⏳ <em>Menganalisis instruksi & menyusun rencana revisi deterministik (L1-L5)...</em>");
+            const loadingId = appendChatMessage("assistant", "⏳ <em>Menganalisis instruksi & menyusun proposal revisi deterministik (L1-L5)...</em>");
 
-        try {
-            const scopeVal = targetScope.value;
-            const payload = {
-                instruction: `${text} (Format Sitasi yang diinginkan: ${citationStyle.value})`,
-                target_scope: scopeVal === "all" ? null : scopeVal
-            };
+            try {
+                const scopeVal = targetScope.value;
+                const payload = {
+                    instruction: `${text} (Format Sitasi yang diinginkan: ${citationStyle.value})`,
+                    target_scope: scopeVal === "all" ? null : scopeVal
+                };
 
-            const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/chat`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+                const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/chat`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
 
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.detail || `Chat API returned status ${res.status}`);
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.detail || `Chat API returned status ${res.status}`);
+                }
+
+                const data = await res.json();
+                currentProposalId = data.proposal_id;
+                activeOperations = (data.plan && data.plan.operations) || [];
+
+                const lNode = document.getElementById(loadingId);
+                if (lNode) lNode.remove();
+
+                appendChatMessage("assistant", `
+                    <h4>✔ Rencana Revisi Selesai Disusun!</h4>
+                    <p>AI telah mengolah instruksi Anda menjadi <code>${activeOperations.length} operasi edit deterministik</code> dengan ringkasan: <strong>"${(data.plan && data.plan.instruction_summary) || text}"</strong>.</p>
+                    <p>Silakan tinjau perbandingan (*Before / After diff*) pada panel kanan sebelum menyetujui perubahan.</p>
+                `);
+
+                renderProposalReview(data.plan);
+
+            } catch (err) {
+                const lNode = document.getElementById(loadingId);
+                if (lNode) lNode.remove();
+                appendChatMessage("assistant", `⚠ <strong>Gagal memproses instruksi:</strong> ${err.message}. Pastikan API Key Blackbox telah terpasang dengan benar di server Render Anda.`);
+                showToast(`Error: ${err.message}`, "error");
+            } finally {
+                instructionInput.disabled = false;
+                sendBtn.disabled = false;
+                instructionInput.focus();
             }
-
-            const data = await res.json();
-            currentProposalId = data.proposal_id;
-            activeOperations = (data.plan && data.plan.operations) || [];
-
-            // Remove loading msg
-            const lNode = document.getElementById(loadingId);
-            if (lNode) lNode.remove();
-
-            appendChatMessage("assistant", `
-                <h4>Rencana Revisi Selesai Disusun!</h4>
-                <p>AI telah mengolah instruksi Anda menjadi <code>${activeOperations.length} operasi edit deterministik</code> dengan ringkasan: <strong>"${(data.plan && data.plan.instruction_summary) || text}"</strong>.</p>
-                <p>Silakan tinjau perbandingan (*Before / After diff*) pada panel kanan sebelum menyetujui perubahan.</p>
-            `);
-
-            renderProposalReview(data.plan);
-
-        } catch (err) {
-            const lNode = document.getElementById(loadingId);
-            if (lNode) lNode.remove();
-            appendChatMessage("assistant", `⚠ <strong>Gagal memproses instruksi:</strong> ${err.message}. Pastikan API Key Blackbox telah terpasang di server Render Anda.`);
-            showToast(`Error: ${err.message}`, "error");
-        } finally {
-            instructionInput.disabled = false;
-            sendBtn.disabled = false;
-            instructionInput.focus();
-        }
-    });
+        });
+    }
 
     function appendChatMessage(role, htmlOrText) {
         const id = "msg_" + Math.random().toString(36).substr(2, 9);
@@ -309,8 +318,8 @@ document.addEventListener("DOMContentLoaded", () => {
         msgDiv.id = id;
         msgDiv.className = `message ${role === "user" ? "user-msg" : "assistant-msg"}`;
         msgDiv.innerHTML = `
-            <div class="msg-avatar">${role === "user" ? "👤" : "🤖"}</div>
-            <div class="msg-content">${role === "user" ? `<p>${htmlOrText}</p>` : htmlOrText}</div>
+            <div class="msg-avatar ${role === "assistant" ? "assistant-avatar" : ""}">${role === "user" ? "👤" : "✨"}</div>
+            <div class="msg-bubble">${role === "user" ? `<p>${htmlOrText}</p>` : htmlOrText}</div>
         `;
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -321,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderProposalReview(plan) {
         proposalContainer.innerHTML = "";
         proposalBadge.innerText = `${activeOperations.length} Operasi Tertunda`;
-        proposalBadge.className = "badge badge-version";
+        proposalBadge.className = "badge badge-pro";
         downloadCard.classList.add("hidden");
 
         if (!activeOperations || activeOperations.length === 0) {
@@ -353,9 +362,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             card.innerHTML = `
-                <div class="proposal-card-header">
+                <div class="proposal-card-top">
                     <strong>#${idx + 1} Target: <code>${op.target_node_id || "document"}</code></strong>
-                    <span class="op-type-badge">${op.type}</span>
+                    <span class="op-type-tag">${op.type}</span>
                 </div>
                 ${diffHtml}
             `;
@@ -365,56 +374,59 @@ document.addEventListener("DOMContentLoaded", () => {
         proposalFooter.classList.remove("hidden");
     }
 
-    rejectProposalBtn.addEventListener("click", () => {
-        currentProposalId = null;
-        activeOperations = [];
-        proposalContainer.innerHTML = `<div class="empty-state"><div class="shield-icon">✕</div><h3>Proposal Ditolak</h3><p>Anda dapat memberikan instruksi chat baru untuk menghasilkan revisi lain.</p></div>`;
-        proposalFooter.classList.add("hidden");
-        proposalBadge.innerText = "Ditolak";
-        proposalBadge.className = "badge badge-neutral";
-        showToast("Proposal perubahan dibatalkan", "info");
-    });
-
-    commitProposalBtn.addEventListener("click", async () => {
-        if (!currentSessionId || !currentProposalId) return;
-        commitProposalBtn.disabled = true;
-        commitProposalBtn.innerText = "⏳ Menerapkan & Memverifikasi XML...";
-
-        try {
-            const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/proposals/${currentProposalId}/commit`, {
-                method: "POST"
-            });
-
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.detail || `Commit gagal dengan status ${res.status}`);
-            }
-
-            const data = await res.json();
-            currentVersion = (data.new_version || data.version || currentVersion + 1);
-
+    if (rejectProposalBtn) {
+        rejectProposalBtn.addEventListener("click", () => {
+            currentProposalId = null;
+            activeOperations = [];
+            proposalContainer.innerHTML = `<div class="empty-state"><div class="shield-graphic">✕</div><h3>Proposal Ditolak</h3><p>Anda dapat memberikan instruksi chat baru untuk menghasilkan revisi lain.</p></div>`;
             proposalFooter.classList.add("hidden");
-            proposalBadge.innerText = `Lolos L1-L5 (v${currentVersion})`;
-            proposalBadge.className = "badge badge-version";
-            
-            // Show download card
-            newVersionNum.innerText = currentVersion;
-            downloadBtn.href = `${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/versions/v${currentVersion}/export`;
-            downloadCard.classList.remove("hidden");
+            proposalBadge.innerText = "Ditolak";
+            proposalBadge.className = "badge badge-light";
+            showToast("Proposal perubahan dibatalkan", "info");
+        });
+    }
 
-            appendChatMessage("assistant", `
-                <h4>🎉 Revisi Berhasil Diterapkan ke Dokumen!</h4>
-                <p>Dokumen Anda telah diperbarui ke <strong>Versi v${currentVersion}</strong>. Seluruh sitasi Mendeley, tabel, dan struktur dokumen telah terverifikasi aman 100%.</p>
-                <p>Klik tombol <strong>Download DOCX Hasil Revisi</strong> di panel kanan untuk mengunduh file baru Anda.</p>
-            `);
+    if (commitProposalBtn) {
+        commitProposalBtn.addEventListener("click", async () => {
+            if (!currentSessionId || !currentProposalId) return;
+            commitProposalBtn.disabled = true;
+            commitProposalBtn.innerText = "⏳ Menerapkan & Memverifikasi XML...";
 
-            showToast("Perubahan berhasil diterapkan ke file .docx!", "success");
+            try {
+                const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/proposals/${currentProposalId}/commit`, {
+                    method: "POST"
+                });
 
-        } catch (err) {
-            showToast(`Gagal menerapkan perubahan: ${err.message}`, "error");
-        } finally {
-            commitProposalBtn.disabled = false;
-            commitProposalBtn.innerText = "✔ Setujui & Terapkan Perubahan";
-        }
-    });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.detail || `Commit gagal dengan status ${res.status}`);
+                }
+
+                const data = await res.json();
+                currentVersion = (data.new_version || data.version || currentVersion + 1);
+
+                proposalFooter.classList.add("hidden");
+                proposalBadge.innerText = `Lolos L1-L5 (v${currentVersion})`;
+                proposalBadge.className = "badge badge-pro";
+                
+                newVersionNum.innerText = currentVersion;
+                downloadBtn.href = `${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/versions/v${currentVersion}/export`;
+                downloadCard.classList.remove("hidden");
+
+                appendChatMessage("assistant", `
+                    <h4>🎉 Revisi Berhasil Diterapkan ke Dokumen!</h4>
+                    <p>Dokumen Anda telah diperbarui ke <strong>Versi v${currentVersion}</strong>. Seluruh sitasi Mendeley, tabel, dan struktur dokumen telah terverifikasi aman 100%.</p>
+                    <p>Klik tombol <strong>Download DOCX Hasil Revisi</strong> di panel kanan untuk mengunduh file baru Anda.</p>
+                `);
+
+                showToast("Perubahan berhasil diterapkan ke file .docx!", "success");
+
+            } catch (err) {
+                showToast(`Gagal menerapkan perubahan: ${err.message}`, "error");
+            } finally {
+                commitProposalBtn.disabled = false;
+                commitProposalBtn.innerText = "✔ Setujui & Terapkan";
+            }
+        });
+    }
 });

@@ -115,14 +115,21 @@ class BlackboxLLMProvider(BaseLLMProvider):
     def __init__(self, api_key: Optional[str] = None, api_base: Optional[str] = None, model: Optional[str] = None):
         self.api_key = api_key or settings.BLACKBOX_API_KEY
         self.api_base = (api_base or settings.BLACKBOX_API_BASE).rstrip("/")
-        self.model = model or settings.BLACKBOX_MODEL or "deepseek-v4-pro"
+        self.model = model or settings.BLACKBOX_MODEL or "blackboxai/deepseek/deepseek-v4-pro"
         self.max_retries = 3
 
     def generate(self, prompt: str, system_prompt: str = "", json_mode: bool = True, max_tokens: int = 4096) -> LLMResponse:
         if not self.api_key:
             raise LLMServiceError("Missing API key for BlackboxLLMProvider.", status_code=500)
 
-        url = f"{self.api_base}/v1/chat/completions"
+        # Blackbox API uses /chat/completions (or /v1/chat/completions)
+        if self.api_base.endswith("/chat/completions"):
+            url = self.api_base
+        elif self.api_base.endswith("/v1"):
+            url = f"{self.api_base}/chat/completions"
+        else:
+            url = f"{self.api_base}/chat/completions"
+
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -149,6 +156,13 @@ class BlackboxLLMProvider(BaseLLMProvider):
                 with httpx.Client(timeout=60.0) as client:
                     response = client.post(url, headers=headers, json=payload)
                 
+                # If Blackbox returns 400 because response_format is unsupported, retry without it
+                if response.status_code == 400 and "response_format" in payload:
+                    logger.warning(f"Blackbox API returned 400 with response_format. Retrying without response_format... Response: {response.text[:200]}")
+                    payload.pop("response_format", None)
+                    with httpx.Client(timeout=60.0) as client:
+                        response = client.post(url, headers=headers, json=payload)
+
                 if response.status_code in (429, 500, 502, 503, 504) and attempt < self.max_retries:
                     backoff = 2 ** attempt
                     logger.warning(f"LLM API returned status {response.status_code}. Retrying in {backoff}s (Attempt {attempt}/{self.max_retries})...")
