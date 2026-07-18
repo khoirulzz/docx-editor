@@ -19,7 +19,7 @@ class IndonesianChapterDetector:
     """Detects academic chapter outlines (BAB I/II/III, PENDAHULUAN, etc.) and assigns levels."""
     
     CHAPTER_REGEX = re.compile(
-        r"^(?:BAB\s+(?:[IVXLCDM]+|\d+)(?:\s*[:\-.]?\s*(.*))?|PENDAHULUAN|TINJAUAN\s+PUSTAKA|METODE\s+PENELITIAN|HASIL\s+DAN\s+PEMBAHASAN|KESIMPULAN|DAFTAR\s+PUSTAKA)",
+        r"^(?:BAB\s+(?:[IVXLCDM]+|\d+)(?:\s*[:\-.]?\s*(.*))?|PENDAHULUAN|TINJAUAN\s+PUSTAKA|METODE\s+PENELITIAN|HASIL\s+DAN\s+PEMBAHASAN|PEMBAHASAN|METODE|HASIL|SARAN|PENUTUP|KESIMPULAN|DAFTAR\s+PUSTAKA|ABSTRAK|ABSTRACT|KATA\s+PENGANTAR|DAFTAR\s+ISI)",
         re.IGNORECASE
     )
     SUBSECTION_REGEX = re.compile(r"^(\d+\.\d+(?:\.\d+)?|[A-Z]\.)\s+(.+)")
@@ -186,6 +186,7 @@ class DocxInspector:
             editability["reason"] = f"Contains protected field: {', '.join(protected_reasons)}"
 
         locator = {"para_id": para_id} if para_id else {"ordinal": ordinal}
+        parent_id = chap_id if (outline_level == 1 and chap_id) else current_chapter_id
 
         return NodeModel(
             node_id=node_id,
@@ -198,7 +199,7 @@ class DocxInspector:
             text_hash=text_hash,
             style_id=style_id,
             outline_level=outline_level,
-            parent_node_id=current_chapter_id,
+            parent_node_id=parent_id,
             features=features,
             editability=editability
         )

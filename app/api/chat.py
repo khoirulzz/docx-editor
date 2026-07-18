@@ -53,13 +53,28 @@ def plan_and_create_proposal(session_id: str, req: AgentPlanRequest):
     # 1. Invoke EditPlannerAgent to generate and validate EditPlan
     planner = EditPlannerAgent()
     available_ref_ids = list(req.reference_store.keys()) if req.reference_store else []
+    references_slice_lines = []
+    if req.reference_store:
+        for ref_id, ref_meta in req.reference_store.items():
+            author = ref_meta.get("author", [{}])
+            author_str = ", ".join([a.get("family", a.get("literal", "")) for a in author if isinstance(a, dict)]) or ref_meta.get("title", ref_id)
+            title = ref_meta.get("title", "")
+            year = ""
+            if isinstance(ref_meta.get("issued"), dict) and "date-parts" in ref_meta["issued"] and ref_meta["issued"]["date-parts"]:
+                year = str(ref_meta["issued"]["date-parts"][0][0])
+            elif "year" in ref_meta:
+                year = str(ref_meta["year"])
+            references_slice_lines.append(f"{ref_id}: {author_str} - {title} ({year})")
+    references_slice = "\n".join(references_slice_lines)
+
     try:
         plan = planner.plan(
             graph=base_graph,
             instruction=req.instruction,
             explicit_node_ids=req.explicit_node_ids,
             explicit_chapter_ids=req.explicit_chapter_ids,
-            available_reference_ids=available_ref_ids
+            available_reference_ids=available_ref_ids,
+            references_slice=references_slice
         )
     except PlanValidationError as e:
         raise HTTPException(status_code=422, detail=f"Agent planning failed schema or semantic checks: {str(e)}")

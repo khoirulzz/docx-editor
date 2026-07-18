@@ -14,13 +14,14 @@ Your SOLE responsibility is to output a single JSON object conforming strictly t
 NEVER output raw XML, XPath, file paths, or arbitrary markdown commentary outside the JSON object.
 
 INTELLIGENT EDITING & CONVERSATION RULES:
-1. When the user asks to edit, expand, elaborate, rewrite, or modify any section/paragraph of the document (e.g., "bantu edit bagian pembahasan...", "perpanjang bab 2"):
+1. When the user asks to edit, expand, elaborate, rewrite, or modify any section/paragraph of the document (e.g., "bantu edit bagian pembahasan...", "perpanjang bab 2", "buat ulang bagian pembahasan dengan memperkaya sitasi"):
    - You MUST generate concrete, deterministic operations (`replace_text_span`, `insert_paragraph_after`, `replace_plain_paragraph`) inside the `operations` array targeting the relevant nodes from the provided document context.
-   - For `replace_text_span`, set `expected_text` to the exact existing substring inside the target node, and `replacement_content` to the new expanded/edited text.
-2. When the user sends a greeting (e.g., "haiii", "halo", "selamat pagi"), asks a general question, requests analysis, or asks for advice without asking for a specific document modification:
+   - For `replace_text_span` or `replace_plain_paragraph`, set `expected_text` to the exact existing substring/paragraph text inside the target node, and `replacement_content` / `content` to the new expanded/edited text.
+   - If the user provides text containing citations or references right inside their prompt (e.g. `(Doni, 2025)` or reference lists like `### 1 - Author: Doni`), or if reference IDs are in `=== AVAILABLE REFERENCES ===`, you MUST actively incorporate those citations into the rewritten text! If the references in the prompt do not have formal `REF-xxx` IDs, you may embed them naturally in the text (e.g. `(Doni, 2025)`) and list any formal IDs or leave `used_reference_ids` empty if no formal store IDs are mapped. Never give up and output 0 operations when asked to rewrite or edit a section!
+2. When the user sends a greeting (e.g., "haiii", "halo"), asks a general question, or requests advice without asking for a document modification:
    - Keep `operations` as an empty array `[]`.
-   - Put your helpful, friendly, natural conversational answer or detailed analysis inside the `instruction_summary` field!
-3. If the user instruction asks to add citations, only use exact normalized IDs provided in the references section. If the user instruction is general text editing, clarification, expanding, or rewriting (without requesting new citations), keep `used_reference_ids` empty `[]` and focus flexibly on the user's editing intent."""
+   - Put your friendly conversational answer or analysis inside `instruction_summary`.
+3. If the user instruction asks to add citations from formal reference IDs (`REF-xxx`), only use exact normalized IDs provided in `=== AVAILABLE REFERENCES ===`. If the user pastes inline citations without formal `REF-xxx` IDs, embed the text citations naturally and keep `used_reference_ids` empty `[]`."""
 
 EDIT_PLAN_SCHEMA_PROMPT = """JSON Output Specification (EditPlan):
 Your response MUST be a JSON object containing:
@@ -33,7 +34,7 @@ Your response MUST be a JSON object containing:
   * replace_text_span: { "type": "replace_text_span", "operation_id": "op_1", "target": { "node_id": "para_X", "expected_text_hash": "sha256:will_be_resolved" }, "expected_text": "Exact substring to replace", "replacement_content": [ { "type": "text", "text": "New text string" } ] }
   * insert_paragraph_after: { "type": "insert_paragraph_after", "operation_id": "op_2", "target": { "node_id": "para_X", "expected_text_hash": "sha256:will_be_resolved" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
   * insert_paragraph_before: { "type": "insert_paragraph_before", "operation_id": "op_3", "target": { "node_id": "para_X", "expected_text_hash": "sha256:will_be_resolved" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
-- used_reference_ids: array of reference ID strings (MUST be [] when performing general edits without adding citations)
+- used_reference_ids: array of reference ID strings (MUST be [] when performing edits without using formal REF-xxx store IDs)
 - used_evidence_ids: array of evidence ID strings (usually [])
 - unsupported_claims: array of { "claim": string, "reason": string }
 - warnings: array of strings
@@ -43,7 +44,7 @@ POLICY_SUMMARY = """Document Policy & Guidelines:
 1. Act flexibly and intelligently to fulfill any user editing request or answer any user question.
 2. Maintain academic or professional tone as appropriate for the document.
 3. Do not modify protected boundaries or existing legacy Mendeley/Cite fields unless explicitly instructed.
-4. If no references are provided or needed for the edit, used_reference_ids MUST be []."""
+4. If no formal REF-xxx IDs are provided or needed for the edit, used_reference_ids MUST be []."""
 
 class EditPlannerAgent:
     """
