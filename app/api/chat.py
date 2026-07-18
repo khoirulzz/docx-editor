@@ -68,6 +68,14 @@ def plan_and_create_proposal(session_id: str, req: AgentPlanRequest):
     plan.document_id = base_graph.document_id
     plan.document_version = base_graph.version
 
+    # Auto-resolve placeholder expected_text_hash from active document graph
+    node_map = {n.node_id: n for n in base_graph.nodes}
+    for op in plan.operations:
+        if getattr(op, "target", None) and op.target.node_id in node_map:
+            n = node_map[op.target.node_id]
+            if op.target.expected_text_hash in ("sha256:will_be_resolved", "sha256:will_be_calculated", "sha256:resolved", "", None) or not op.target.expected_text_hash.startswith("sha256:"):
+                op.target.expected_text_hash = n.text_hash
+
     # 2. Execute mutations deterministically
     executor = DocxMutationExecutor(root, base_graph, reference_store=req.reference_store)
     try:

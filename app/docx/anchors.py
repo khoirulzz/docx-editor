@@ -53,6 +53,10 @@ class AnchorResolver:
             raise NotFoundError(f"Element corresponding to target node '{target.node_id}'")
 
         # 4. Strict Precondition Check
+        if target.expected_text_hash in ("sha256:will_be_resolved", "sha256:will_be_calculated", "sha256:resolved", "", None) or (target.expected_text_hash and not target.expected_text_hash.startswith("sha256:")):
+            if node.text_hash:
+                target.expected_text_hash = node.text_hash
+
         live_hash = self.compute_element_text_hash(elem)
         if live_hash != target.expected_text_hash:
             raise PreconditionFailedError(
