@@ -419,11 +419,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Proposal & Diff Rendering ---
     function getBlocksText(content) {
+        if (!content) return "";
         if (typeof content === "string") return content;
         if (Array.isArray(content)) {
-            return content.map(c => typeof c === "string" ? c : (c.text || c.value || "")).join(" ");
+            return content.map(c => {
+                if (typeof c === "string") return c;
+                if (c && typeof c === "object") {
+                    return c.text || c.value || c.content || (c.runs && c.runs.map(r => r.text || "").join(" ")) || JSON.stringify(c);
+                }
+                return "";
+            }).join(" ");
         }
-        return "";
+        if (typeof content === "object") {
+            return content.text || content.value || content.content || JSON.stringify(content);
+        }
+        return String(content);
     }
 
     function renderProposalReview(plan) {
@@ -443,31 +453,31 @@ document.addEventListener("DOMContentLoaded", () => {
             card.className = "proposal-card";
             
             let diffHtml = "";
-            const targetId = op.target_node_id || (op.target && op.target.node_id) || "document";
-            const newText = getBlocksText(op.replacement_content || op.content || op.new_span || op.text);
-            const oldText = op.expected_text || op.original_span || "Teks lama...";
+            const targetId = op.target_node_id || (op.target && (op.target.node_id || op.target.id)) || "document";
+            const newText = getBlocksText(op.replacement_content || op.content || op.new_span || op.text || op.runs || op.paragraph);
+            const oldText = op.expected_text || op.original_span || op.old_text || "Teks lama...";
 
-            if (op.type === "replace_text_span") {
+            if (op.type === "replace_text_span" || op.type.includes("replace_text")) {
                 diffHtml = `
                     <div class="diff-box">
                         <div class="diff-old">- ${oldText}</div>
                         <div class="diff-new">+ ${newText || "Teks baru..."}</div>
                     </div>
                 `;
-            } else if (op.type === "insert_paragraph" || op.type === "insert_paragraph_after" || op.type === "insert_paragraph_before") {
+            } else if (op.type.includes("insert") || op.type.includes("add")) {
                 diffHtml = `
                     <div class="diff-box">
                         <div class="diff-new">+ [${op.type}] ${newText || ""}</div>
                     </div>
                 `;
-            } else if (op.type === "replace_plain_paragraph") {
+            } else if (op.type.includes("replace_plain_paragraph") || op.type.includes("replace_paragraph")) {
                 diffHtml = `
                     <div class="diff-box">
                         <div class="diff-old">- [Paragraf Lama] ${oldText}</div>
                         <div class="diff-new">+ [Paragraf Baru] ${newText || ""}</div>
                     </div>
                 `;
-            } else if (op.type === "delete_plain_paragraph") {
+            } else if (op.type.includes("delete") || op.type.includes("remove")) {
                 diffHtml = `
                     <div class="diff-box">
                         <div class="diff-old">- [Hapus Paragraf] ${oldText || targetId}</div>
@@ -494,11 +504,11 @@ document.addEventListener("DOMContentLoaded", () => {
         rejectProposalBtn.addEventListener("click", () => {
             currentProposalId = null;
             activeOperations = [];
-            proposalContainer.innerHTML = `<div class="empty-state"><div class="shield-graphic">✕</div><h3>Proposal Ditolak</h3><p>Anda dapat memberikan instruksi chat baru untuk menghasilkan revisi lain.</p></div>`;
+            proposalContainer.innerHTML = `<div class="empty-state"><span>Proposal dibatalkan. Silakan berikan instruksi revisi baru.</span></div>`;
             proposalFooter.classList.add("hidden");
-            proposalBadge.innerText = "Ditolak";
-            proposalBadge.className = "badge badge-light";
-            showToast("Proposal perubahan dibatalkan", "info");
+            proposalBadge.innerText = `0 Operasi`;
+            proposalBadge.className = "badge";
+            appendChatMessage("assistant", `❌ Proposal revisi telah dibatalkan.`);
         });
     }
 
@@ -506,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
         commitProposalBtn.addEventListener("click", async () => {
             if (!currentSessionId || !currentProposalId) return;
             commitProposalBtn.disabled = true;
-            commitProposalBtn.innerText = "⏳ Menerapkan & Memverifikasi XML...";
+            commitProposalBtn.innerHTML = `⏳ Menyimpan...`;
 
             try {
                 const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/proposals/${currentProposalId}/commit`, {
@@ -534,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 proposalBadge.className = "badge badge-pro";
                 
                 newVersionNum.innerText = currentVersion;
-                downloadBtn.href = `${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/versions/v${currentVersion}/export`;
+                downloadBtn.href = `${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/versions/${currentVersion}/export`;
                 downloadCard.classList.remove("hidden");
 
                 appendChatMessage("assistant", `

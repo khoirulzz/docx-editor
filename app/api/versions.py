@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel
 from app.models.domain import ProposalState, SessionState
@@ -82,16 +82,20 @@ def list_versions(session_id: str):
     ]
 
 @router.get("/{session_id}/versions/{version_num}/export")
-def export_version(session_id: str, version_num: int):
+def export_version(session_id: str, version_num: Union[int, str]):
     session = session_store.get_session(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found.")
-    record = version_store.get_version(session_id, version_num)
+    try:
+        clean_v = int(str(version_num).lstrip("vV"))
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid version number format: {version_num}")
+    record = version_store.get_version(session_id, clean_v)
     if not record:
         raise HTTPException(status_code=404, detail="Version not found.")
 
     return Response(
         content=record.docx_bytes,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        headers={"Content-Disposition": f'attachment; filename="{record.document_id}_v{version_num}.docx"'}
+        headers={"Content-Disposition": f'attachment; filename="{record.document_id}_v{clean_v}.docx"'}
     )
