@@ -72,7 +72,7 @@ class Settings(BaseModel):
             MAX_XML_PART_BYTES=get_int("MAX_XML_PART_BYTES", 104_857_600),
             BLACKBOX_API_KEY=os.getenv("BLACKBOX_API_KEY", ""),
             BLACKBOX_API_BASE=os.getenv("BLACKBOX_API_BASE", "https://api.blackbox.ai"),
-            BLACKBOX_MODEL=os.getenv("BLACKBOX_MODEL", "deepseek-v4-pro"),
+            BLACKBOX_MODEL=os.getenv("BLACKBOX_MODEL", "blackboxai/deepseek/deepseek-v4-pro"),
             BLACKBOX_ZDR_REQUIRED=get_bool("BLACKBOX_ZDR_REQUIRED", True),
             CROSSREF_MAILTO=os.getenv("CROSSREF_MAILTO", ""),
             STORAGE_BACKEND=os.getenv("STORAGE_BACKEND", "local"),

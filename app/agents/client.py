@@ -115,7 +115,13 @@ class BlackboxLLMProvider(BaseLLMProvider):
     def __init__(self, api_key: Optional[str] = None, api_base: Optional[str] = None, model: Optional[str] = None):
         self.api_key = api_key or settings.BLACKBOX_API_KEY
         self.api_base = (api_base or settings.BLACKBOX_API_BASE).rstrip("/")
-        self.model = model or settings.BLACKBOX_MODEL or "blackboxai/deepseek/deepseek-v4-pro"
+        raw_model = model or settings.BLACKBOX_MODEL or "blackboxai/deepseek/deepseek-v4-pro"
+        if raw_model in ("deepseek-v4-pro", "blackboxai/deepseek-v4-pro"):
+            self.model = "blackboxai/deepseek/deepseek-v4-pro"
+        elif raw_model == "deepseek-v3":
+            self.model = "blackboxai/deepseek/deepseek-v3"
+        else:
+            self.model = raw_model
         self.max_retries = 3
 
     def generate(self, prompt: str, system_prompt: str = "", json_mode: bool = True, max_tokens: int = 4096) -> LLMResponse:
