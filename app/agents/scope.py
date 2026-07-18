@@ -22,7 +22,7 @@ class ScopeSelector:
         instruction_text: str,
         explicit_node_ids: Optional[List[str]] = None,
         explicit_chapter_ids: Optional[List[str]] = None,
-        max_nodes: int = 100
+        max_nodes: int = 250
     ) -> Tuple[List[str], List[str]]:
         """
         Returns (selected_node_ids, selected_chapter_ids).
@@ -77,9 +77,10 @@ class ScopeSelector:
             c_bab_matches = set(re.findall(r'\bbab\s+[0-9ivxlcdm]+\b', c_title_lower))
             has_bab_match = bool(inst_bab_matches and (inst_bab_matches & c_bab_matches))
             
-            # Or significant word match (>3 chars)
+            # Or significant word match (>3 chars excluding generic instruction stopwords)
+            stopwords = {"tolong", "untuk", "dengan", "adalah", "serta", "dalam", "pada", "bantu", "edit", "bagian", "uraikan", "tiap", "penjelasannya", "lebih", "panjang", "detail", "buat", "yang", "rapih", "sesuai", "format", "artikel", "ini", "tambahkan", "ubah", "ganti", "hapus", "perbaiki", "dari", "agar", "bisa", "seperti"}
             c_words = set(re.findall(r'\b[a-z]{4,}\b', c_title_lower))
-            inst_words = set(re.findall(r'\b[a-z]{4,}\b', instruction_lower))
+            inst_words = set(re.findall(r'\b[a-z]{4,}\b', instruction_lower)) - stopwords
             has_word_match = bool(c_words and (c_words & inst_words))
 
             if cid and (has_bab_match or has_word_match or (c_title_lower and c_title_lower in instruction_lower)):
@@ -90,7 +91,9 @@ class ScopeSelector:
 
         # Check keyword matches inside node text
         if not matched_nodes:
-            keywords = [w for w in re.findall(r'\b[a-z]{4,}\b', instruction_lower) if w not in ("tolong", "untuk", "dengan", "adalah", "serta", "dalam", "pada")]
+            stopwords = {"tolong", "untuk", "dengan", "adalah", "serta", "dalam", "pada", "bantu", "edit", "bagian", "uraikan", "tiap", "penjelasannya", "lebih", "panjang", "detail", "buat", "yang", "rapih", "sesuai", "format", "artikel", "ini", "tambahkan", "ubah", "ganti", "hapus", "perbaiki", "dari", "agar", "bisa", "seperti"}
+            keywords = [w for w in re.findall(r'\b[a-z]{4,}\b', instruction_lower) if w not in stopwords]
+            matched_parents = set()
             for n in graph.nodes:
                 text = _get_attr(n, "text", "")
                 text_lower = str(text).lower() if text else ""
@@ -98,23 +101,25 @@ class ScopeSelector:
                     nid = _get_attr(n, "node_id")
                     matched_nodes.add(nid)
                     pid = _get_attr(n, "parent_node_id")
-                    if pid and pid in chapter_map:
-                        matched_chapters.add(pid)
+                    if pid:
+                        matched_parents.add(pid)
+                        if pid in chapter_map:
+                            matched_chapters.add(pid)
+            # Include all sibling nodes inside matched parents to give LLM full section context
+            if matched_parents:
+                for nid, n in node_map.items():
+                    if _get_attr(n, "parent_node_id") in matched_parents:
+                        matched_nodes.add(nid)
 
-        # If still empty, include first chapter nodes or first max_nodes
+        # If still empty (e.g. conversational prompt or broad instruction), include entire document context up to max_nodes
         if not matched_nodes:
             if graph.chapters:
-                first_cid = _get_attr(graph.chapters[0], "chapter_id")
-                if first_cid:
-                    matched_chapters.add(first_cid)
-                    count = 0
-                    for n in graph.nodes:
-                        if _get_attr(n, "parent_node_id") == first_cid and count < max_nodes:
-                            matched_nodes.add(_get_attr(n, "node_id"))
-                            count += 1
-            if not matched_nodes:
-                for n in graph.nodes[:max_nodes]:
-                    matched_nodes.add(_get_attr(n, "node_id"))
+                for c in graph.chapters:
+                    cid = _get_attr(c, "chapter_id")
+                    if cid:
+                        matched_chapters.add(cid)
+            for n in graph.nodes[:max_nodes]:
+                matched_nodes.add(_get_attr(n, "node_id"))
 
         # Enforce max_nodes bound
         sorted_nodes = [

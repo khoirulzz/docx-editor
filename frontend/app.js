@@ -362,11 +362,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
                             const summaryEl = document.getElementById(`${accordionId}_summary`);
                             if (summaryEl) {
-                                summaryEl.innerHTML = `
-                                    <h4>✔ Rencana Revisi Selesai Disusun!</h4>
-                                    <p>AI telah mengolah instruksi Anda menjadi <code>${activeOperations.length} operasi edit deterministik</code> dengan ringkasan: <strong>"${(dataObj.plan && dataObj.plan.instruction_summary) || text}"</strong>.</p>
-                                    <p>Silakan tinjau perbandingan (*Before / After diff*) pada panel kanan sebelum menyetujui perubahan.</p>
-                                `;
+                                if (activeOperations.length === 0) {
+                                    const respText = (dataObj.plan && dataObj.plan.instruction_summary) || text || "Halo! Ada yang bisa saya bantu dengan dokumen Anda?";
+                                    summaryEl.innerHTML = `
+                                        <div style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); margin-top: 4px;">
+                                            <p style="white-space: pre-line; margin-bottom: 0;">${respText}</p>
+                                        </div>
+                                    `;
+                                    proposalBadge.innerText = `💬 Respons AI`;
+                                    proposalBadge.className = "badge";
+                                } else {
+                                    summaryEl.innerHTML = `
+                                        <h4>✔ Rencana Revisi Selesai Disusun!</h4>
+                                        <p>AI telah menyusun <code>${activeOperations.length} operasi modifikasi</code> dengan ringkasan: <strong>"${(dataObj.plan && dataObj.plan.instruction_summary) || text}"</strong>.</p>
+                                        <p>Silakan tinjau perbandingan (*Before / After diff*) pada panel kanan sebelum menyetujui perubahan.</p>
+                                    `;
+                                }
                             }
                             renderProposalReview(dataObj.plan);
                         } else if (eventType === "error") {
@@ -407,6 +418,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- Proposal & Diff Rendering ---
+    function getBlocksText(content) {
+        if (typeof content === "string") return content;
+        if (Array.isArray(content)) {
+            return content.map(c => typeof c === "string" ? c : (c.text || c.value || "")).join(" ");
+        }
+        return "";
+    }
+
     function renderProposalReview(plan) {
         proposalContainer.innerHTML = "";
         proposalBadge.innerText = `${activeOperations.length} Operasi Tertunda`;
@@ -414,7 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCard.classList.add("hidden");
 
         if (!activeOperations || activeOperations.length === 0) {
-            proposalContainer.innerHTML = `<div class="empty-state"><span>Tidak ada operasi modifikasi yang diperlukan berdasarkan instruksi Anda.</span></div>`;
+            proposalContainer.innerHTML = `<div class="empty-state"><span>💬 Respons percakapan AI atau analisis tanpa modifikasi teks pada dokumen (.docx).</span></div>`;
             proposalFooter.classList.add("hidden");
             return;
         }
@@ -424,26 +443,43 @@ document.addEventListener("DOMContentLoaded", () => {
             card.className = "proposal-card";
             
             let diffHtml = "";
+            const targetId = op.target_node_id || (op.target && op.target.node_id) || "document";
+            const newText = getBlocksText(op.replacement_content || op.content || op.new_span || op.text);
+            const oldText = op.expected_text || op.original_span || "Teks lama...";
+
             if (op.type === "replace_text_span") {
                 diffHtml = `
                     <div class="diff-box">
-                        <div class="diff-old">- ${op.original_span || "Teks lama..."}</div>
-                        <div class="diff-new">+ ${op.new_span || "Teks baru..."}</div>
+                        <div class="diff-old">- ${oldText}</div>
+                        <div class="diff-new">+ ${newText || "Teks baru..."}</div>
                     </div>
                 `;
-            } else if (op.type === "insert_paragraph") {
+            } else if (op.type === "insert_paragraph" || op.type === "insert_paragraph_after" || op.type === "insert_paragraph_before") {
                 diffHtml = `
                     <div class="diff-box">
-                        <div class="diff-new">+ [Paragraf Baru] ${op.text || op.content || ""}</div>
+                        <div class="diff-new">+ [${op.type}] ${newText || ""}</div>
+                    </div>
+                `;
+            } else if (op.type === "replace_plain_paragraph") {
+                diffHtml = `
+                    <div class="diff-box">
+                        <div class="diff-old">- [Paragraf Lama] ${oldText}</div>
+                        <div class="diff-new">+ [Paragraf Baru] ${newText || ""}</div>
+                    </div>
+                `;
+            } else if (op.type === "delete_plain_paragraph") {
+                diffHtml = `
+                    <div class="diff-box">
+                        <div class="diff-old">- [Hapus Paragraf] ${oldText || targetId}</div>
                     </div>
                 `;
             } else {
-                diffHtml = `<div class="diff-box"><div class="diff-new">Operasi: ${op.type}</div></div>`;
+                diffHtml = `<div class="diff-box"><div class="diff-new">Operasi (${op.type}): ${newText || JSON.stringify(op)}</div></div>`;
             }
 
             card.innerHTML = `
                 <div class="proposal-card-top">
-                    <strong>#${idx + 1} Target: <code>${op.target_node_id || "document"}</code></strong>
+                    <strong>#${idx + 1} Target: <code>${targetId}</code></strong>
                     <span class="op-type-tag">${op.type}</span>
                 </div>
                 ${diffHtml}
