@@ -24,8 +24,8 @@ Your response MUST be a JSON object containing:
 - scope: { "allowed_node_ids": [array of node IDs modified] }
 - operations: array of operation objects. Supported operation types:
   * replace_text_span: { "type": "replace_text_span", "operation_id": "op_1", "target": { "node_id": "para_X", "expected_text_hash": "sha256:will_be_resolved" }, "expected_text": "Exact substring to replace", "replacement_content": [ { "type": "text", "text": "New text string" } ] }
-  * insert_paragraph_after: { "type": "insert_paragraph_after", "operation_id": "op_2", "target": { "node_id": "para_X" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
-  * insert_paragraph_before: { "type": "insert_paragraph_before", "operation_id": "op_3", "target": { "node_id": "para_X" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
+  * insert_paragraph_after: { "type": "insert_paragraph_after", "operation_id": "op_2", "target": { "node_id": "para_X", "expected_text_hash": "sha256:will_be_resolved" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
+  * insert_paragraph_before: { "type": "insert_paragraph_before", "operation_id": "op_3", "target": { "node_id": "para_X", "expected_text_hash": "sha256:will_be_resolved" }, "paragraph_style_policy": { "style_id": "Normal" }, "content": [ { "type": "text", "text": "New paragraph text" } ] }
 - used_reference_ids: array of reference ID strings (MUST be [] when performing general edits without adding citations)
 - used_evidence_ids: array of evidence ID strings (usually [])
 - unsupported_claims: array of { "claim": string, "reason": string }

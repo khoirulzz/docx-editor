@@ -54,6 +54,24 @@ class PlanGateway:
         else:
             data = raw_plan_json
 
+        # Normalize common LLM shortcuts before Pydantic validation
+        if isinstance(data, dict):
+            if "scope" not in data or not isinstance(data.get("scope"), dict):
+                data["scope"] = {"allowed_node_ids": []}
+            if "allowed_node_ids" not in data["scope"] or not isinstance(data["scope"].get("allowed_node_ids"), list):
+                data["scope"]["allowed_node_ids"] = []
+            for op in data.get("operations", []):
+                if isinstance(op, dict):
+                    if "target" in op and isinstance(op["target"], str):
+                        op["target"] = {"node_id": op["target"], "expected_text_hash": "sha256:will_be_resolved"}
+                    elif "target" in op and isinstance(op["target"], dict):
+                        if not op["target"].get("expected_text_hash"):
+                            op["target"]["expected_text_hash"] = "sha256:will_be_resolved"
+                    if "replacement_content" in op and isinstance(op["replacement_content"], str):
+                        op["replacement_content"] = [{"type": "text", "text": op["replacement_content"]}]
+                    if "content" in op and isinstance(op["content"], str):
+                        op["content"] = [{"type": "text", "text": op["content"]}]
+
         # Validate with Pydantic model (which strictly mirrors schema)
         try:
             plan = EditPlan.model_validate(data)

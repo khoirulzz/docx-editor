@@ -20,6 +20,13 @@ class AppException(Exception):
         self.details = details or {}
         self.request_id = request_id
 
+    def __str__(self) -> str:
+        if self.details and "error" in self.details:
+            return f"{self.message} Details: {self.details['error']}"
+        elif self.details:
+            return f"{self.message} Details: {self.details}"
+        return self.message
+
     def to_dict(self, request_id: str) -> Dict[str, Any]:
         return {
             "error": {

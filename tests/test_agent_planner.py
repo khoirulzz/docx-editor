@@ -104,8 +104,8 @@ def test_edit_planner_agent_repair_retry_flow():
     graph = build_sample_graph()
     mock_provider = MockLLMProvider()
     
-    # First call returns invalid JSON missing required fields
-    invalid_json = '{"schema_version": "edit-plan/1.0", "bad_field": true}'
+    # First call returns invalid JSON missing required fields/violating min_length
+    invalid_json = '{"schema_version": "edit-plan/1.0", "operations": [{"type": "replace_text_span", "target": {"node_id": "para_1"}, "expected_text": "hello", "replacement_content": []}]}'
     # Second call (after repair request) returns valid plan
     valid_plan_dict = {
         "schema_version": "edit-plan/1.0",
