@@ -265,7 +265,26 @@ document.addEventListener("DOMContentLoaded", () => {
             instructionInput.disabled = true;
             sendBtn.disabled = true;
 
-            const loadingId = appendChatMessage("assistant", "⏳ <em>Menganalisis instruksi & menyusun proposal revisi deterministik (L1-L5)...</em>");
+            const accordionId = "thinking_" + Math.random().toString(36).substr(2, 9);
+            const startTimestamp = Date.now();
+            appendChatMessage("assistant", `
+                <div class="thinking-accordion" id="${accordionId}">
+                    <div class="thinking-header" onclick="this.parentElement.classList.toggle('collapsed')">
+                        <div class="thinking-header-left">
+                            <span class="thinking-pulse-icon"></span>
+                            <span class="thinking-title">🧠 AI sedang menganalisis & menyusun strategi...</span>
+                        </div>
+                        <span class="thinking-toggle-btn">[Klik untuk melihat/sembunyikan log]</span>
+                    </div>
+                    <div class="thinking-body" id="${accordionId}_body">
+                        <div class="thinking-log-line">
+                            <span class="thinking-log-time">[00.0s]</span>
+                            <span class="thinking-log-text">Memulai alur kerja perencanaan & mutasi dokumen...</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="${accordionId}_summary"></div>
+            `);
 
             try {
                 const scopeVal = targetScope.value;
@@ -274,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     target_scope: scopeVal === "all" ? null : scopeVal
                 };
 
-                const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/chat`, {
+                const res = await fetch(`${apiBaseUrl.rstrip("/")}/v1/sessions/${currentSessionId}/chat/stream`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
@@ -286,24 +305,83 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error(errMsg);
                 }
 
-                const data = await res.json();
-                currentProposalId = data.proposal_id;
-                activeOperations = (data.plan && data.plan.operations) || [];
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let buffer = "";
 
-                const lNode = document.getElementById(loadingId);
-                if (lNode) lNode.remove();
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
 
-                appendChatMessage("assistant", `
-                    <h4>✔ Rencana Revisi Selesai Disusun!</h4>
-                    <p>AI telah mengolah instruksi Anda menjadi <code>${activeOperations.length} operasi edit deterministik</code> dengan ringkasan: <strong>"${(data.plan && data.plan.instruction_summary) || text}"</strong>.</p>
-                    <p>Silakan tinjau perbandingan (*Before / After diff*) pada panel kanan sebelum menyetujui perubahan.</p>
-                `);
+                    const lines = buffer.split("\n\n");
+                    buffer = lines.pop() || ""; // keep remainder
 
-                renderProposalReview(data.plan);
+                    for (const chunk of lines) {
+                        const chunkLines = chunk.split("\n");
+                        let eventType = "message";
+                        let dataStr = "";
+
+                        for (const l of chunkLines) {
+                            if (l.startsWith("event: ")) {
+                                eventType = l.substring(7).trim();
+                            } else if (l.startsWith("data: ")) {
+                                dataStr = l.substring(6).trim();
+                            }
+                        }
+
+                        if (!dataStr) continue;
+                        let dataObj = {};
+                        try { dataObj = JSON.parse(dataStr); } catch (err) { continue; }
+
+                        const elapsed = ((Date.now() - startTimestamp) / 1000).toFixed(1) + "s";
+                        const bodyEl = document.getElementById(`${accordionId}_body`);
+
+                        if (eventType === "thinking" || eventType === "tool_call") {
+                            if (bodyEl) {
+                                const line = document.createElement("div");
+                                line.className = "thinking-log-line";
+                                const textSpanClass = eventType === "tool_call" ? "thinking-log-text tool-call" : "thinking-log-text";
+                                const iconPrefix = eventType === "tool_call" ? "⚙️ " : "💭 ";
+                                const messageText = dataObj.text || dataObj.message || "";
+                                line.innerHTML = `<span class="thinking-log-time">[${elapsed}]</span><span class="${textSpanClass}">${iconPrefix}${messageText}</span>`;
+                                bodyEl.appendChild(line);
+                                bodyEl.scrollTop = bodyEl.scrollHeight;
+                            }
+                        } else if (eventType === "proposal_ready") {
+                            const elapsedTotal = ((Date.now() - startTimestamp) / 1000).toFixed(1) + "s";
+                            const accEl = document.getElementById(accordionId);
+                            if (accEl) {
+                                accEl.classList.add("completed", "collapsed");
+                                const titleEl = accEl.querySelector(".thinking-title");
+                                if (titleEl) titleEl.innerText = `✔️ Selesai menganalisis & menyusun proposal (${elapsedTotal})`;
+                            }
+
+                            currentProposalId = (dataObj.proposal && dataObj.proposal.proposal_id) || "";
+                            activeOperations = (dataObj.plan && dataObj.plan.operations) || [];
+
+                            const summaryEl = document.getElementById(`${accordionId}_summary`);
+                            if (summaryEl) {
+                                summaryEl.innerHTML = `
+                                    <h4>✔ Rencana Revisi Selesai Disusun!</h4>
+                                    <p>AI telah mengolah instruksi Anda menjadi <code>${activeOperations.length} operasi edit deterministik</code> dengan ringkasan: <strong>"${(dataObj.plan && dataObj.plan.instruction_summary) || text}"</strong>.</p>
+                                    <p>Silakan tinjau perbandingan (*Before / After diff*) pada panel kanan sebelum menyetujui perubahan.</p>
+                                `;
+                            }
+                            renderProposalReview(dataObj.plan);
+                        } else if (eventType === "error") {
+                            throw new Error(dataObj.message || "Unknown streaming error.");
+                        }
+                    }
+                }
 
             } catch (err) {
-                const lNode = document.getElementById(loadingId);
-                if (lNode) lNode.remove();
+                const accEl = document.getElementById(accordionId);
+                if (accEl) {
+                    accEl.classList.add("collapsed");
+                    const titleEl = accEl.querySelector(".thinking-title");
+                    if (titleEl) titleEl.innerText = `⚠ Gagal: ${err.message}`;
+                }
                 appendChatMessage("assistant", `⚠ <strong>Gagal memproses instruksi:</strong> ${err.message}. Pastikan API Key Blackbox telah terpasang dengan benar di server Render Anda.`);
                 showToast(`Error: ${err.message}`, "error");
             } finally {
