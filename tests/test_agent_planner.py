@@ -156,3 +156,32 @@ def test_semantic_verifier_agent():
     assert report.advisory_pass is True
     assert report.confidence_score == 0.95
     assert "Changes look very good and natural." in report.feedback_notes
+
+def test_robust_json_sanitizer():
+    from app.core.plan_gateway import _clean_and_extract_json
+    from app.agents.client import _clean_llm_json
+
+    inputs = [
+        # 1. Unclosed think tag and markdown fences
+        "<think>Thinking process\nwithout closing tag...\n```json\n{\"key\": \"val\"}\n```",
+        # 2. Trailing commas inside dictionary and list
+        "{\"arr\": [1, 2, 3,], \"obj\": {\"a\": 1,},}",
+        # 3. Newlines and tabs inside a JSON string literal
+        "{\"text\": \"line 1\nline 2\tline 3\"}"
+    ]
+
+    for inp in inputs:
+        cleaned1 = _clean_and_extract_json(inp)
+        cleaned2 = _clean_llm_json(inp)
+        assert cleaned1 == cleaned2
+        
+        # Verify it parses as valid JSON
+        data = json.loads(cleaned1)
+        if "key" in data:
+            assert data["key"] == "val"
+        elif "arr" in data:
+            assert data["arr"] == [1, 2, 3]
+            assert data["obj"] == {"a": 1}
+        elif "text" in data:
+            assert data["text"] == "line 1\nline 2\tline 3"
+

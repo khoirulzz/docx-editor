@@ -10,17 +10,28 @@ def _clean_and_extract_json(text: str) -> str:
     if not isinstance(text, str):
         return text
     cleaned = text.strip()
-    # Strip <think>...</think> blocks common in reasoning models
-    cleaned = re.sub(r"<think>.*?</think>", "", cleaned, flags=re.DOTALL).strip()
-    # Check for markdown code fences (```json ... ``` or ``` ... ```)
+    
+    # 1. Clean <think>...</think> blocks, supporting unclosed or missing closing tag fallbacks
+    cleaned = re.sub(r"<think>.*?(?:</think>|(?=\s*(?:```|\{)))", "", cleaned, flags=re.DOTALL).strip()
+    
+    # 2. Extract JSON block from markdown fences or outermost braces
     match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, flags=re.DOTALL)
     if match:
-        return match.group(1).strip()
-    # If no fences or invalid JSON, try finding outermost braces
-    start = cleaned.find("{")
-    end = cleaned.rfind("}")
-    if start != -1 and end != -1 and start <= end:
-        return cleaned[start:end+1]
+        cleaned = match.group(1).strip()
+    else:
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and start <= end:
+            cleaned = cleaned[start:end+1]
+            
+    # 3. Escape raw control characters (newlines, carriage returns, tabs) inside string literals
+    string_pattern = re.compile(r'"(?:[^"\\]|\\.)*"')
+    cleaned = string_pattern.sub(lambda m: m.group(0).replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t"), cleaned)
+    
+    # 4. Remove trailing commas before closing braces/brackets (ignoring strings)
+    comma_pattern = re.compile(r'("(?:[^"\\]|\\.)*")|,\s*(?=[}\]])')
+    cleaned = comma_pattern.sub(lambda m: m.group(1) if m.group(1) else "", cleaned)
+    
     return cleaned
 
 class PlanGateway:
