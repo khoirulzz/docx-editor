@@ -148,7 +148,8 @@ class BlackboxLLMProvider(BaseLLMProvider):
             "max_tokens": max_tokens,
             "temperature": 0.1
         }
-        if json_mode:
+        # Blackbox API gateway rejects response_format for deepseek/blackboxai model groups
+        if json_mode and "blackbox.ai" not in url and "blackboxai" not in self.model:
             payload["response_format"] = {"type": "json_object"}
 
         for attempt in range(1, self.max_retries + 1):
@@ -156,9 +157,9 @@ class BlackboxLLMProvider(BaseLLMProvider):
                 with httpx.Client(timeout=60.0) as client:
                     response = client.post(url, headers=headers, json=payload)
                 
-                # If Blackbox returns 400 because response_format is unsupported, retry without it
+                # If Blackbox or any gateway returns 400 because response_format is unsupported, retry without it
                 if response.status_code == 400 and "response_format" in payload:
-                    logger.warning(f"Blackbox API returned 400 with response_format. Retrying without response_format... Response: {response.text[:200]}")
+                    logger.warning(f"API returned 400 with response_format. Retrying without response_format... Response: {response.text[:200]}")
                     payload.pop("response_format", None)
                     with httpx.Client(timeout=60.0) as client:
                         response = client.post(url, headers=headers, json=payload)
